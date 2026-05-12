@@ -1,2 +1,9 @@
 # PDF
 WebshopRequirements.pdf
+
+/Utils
+
+/sql/friends.sql
+/sql/create_orders_table.sql
+/sql/create_products_table.sql
+/sql/tables.sql
