@@ -1,0 +1,228 @@
+import * as THREE from 'three';
+
+const scene = new THREE.Scene();        // FOV, aspect ratio            clipping plane: near  far   
+const camera = new THREE.PerspectiveCamera(75, window.screen.width / window.innerHeight, 0.1, 1000);
+camera.position.z = 10;
+
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const light = new DirectionalLight(0xFFFFFF, 1);
+light.position.set(0, 0, 2);
+scene.add(light);
+
+const geometry = new THREE.BoxGeometry(7, 20, 1);
+const material = new THREE.MeshBasicMaterial({color:0x00ff00});
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+const color = new THREE.Color().setRGB( 0.1, 0.2, 0.9 );
+cube.material.color = color;
+cube.position.x = 0;
+cube.position.y = 7;
+
+let num_cubes = 0;
+
+function getRndInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
+const max_x = Math.floor(33/2);
+let remaining_x = max_x;
+const xs = [];
+const max_cubes = getRndInteger(1, 10);
+
+function defineXs() {
+    let sum = 0;
+    while (xs.length < max_cubes && sum <= max_x) {
+        const size_x = getRndInteger(1, 5);
+        console.log(sum+ " " + size_x)
+        if (sum + size_x <= max_x) {
+            sum += size_x;
+            xs.push(size_x);
+        } else {
+            console.log("max");
+            break;
+        }
+    }
+}
+defineXs();
+num_cubes = xs.length;
+console.log(xs);
+const new_xs = shuffleArray(xs);
+
+function shuffleArray(array) {
+  let length = array.length;
+  let shuffle = array.slice(); // copy of array
+  // loop over the array
+  for (let i = length - 1; i > 0; i -= 1) {
+    let random = Math.floor(Math.random() * (i + 1)); // random card position
+    let current = shuffle[i]; // current card
+    // swap the random card and the current card
+    shuffle[i] = shuffle[random]; // move the random card to the current position
+    shuffle[random] = current; // put the current card in the random position
+  }
+  return shuffle; // return shuffled array
+};
+
+
+function defineCube(dube_number) {
+    const size_x = new_xs[cube_number];
+    const size_y = getRndInteger(2, 20);
+    const size_z = getRndInteger(1, 4);
+    
+    const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
+    const material = new THREE.MeshBasicMaterial();
+    const cube = new THREE.Mesh(geometry, material);
+    
+    cube.position.x = getRndInteger(-16, 16);
+    cube.position.y = 8;
+    //cube.position.z = getRndInteger(-16, 16);
+
+    cube.material.color = new THREE.Color().setRGB( Math.random(), Math.random(), Math.random());
+
+    scene.add(cube);
+}
+
+let cube_number = 0;
+
+function animate(time) {
+    //defineXs();
+    
+    if (num_cubes <= max_cubes) {
+        //let xs = [];
+        defineCube(cube_number);
+        //console.log(xs)
+        cube_number += 1;
+        num_cubes += 1;
+    } 
+    //increaseCube(cube)//.position.x = 1;
+    //cube.position.y = 2;
+    cube.rotation.x = time / 800;
+    cube.rotation.y = time / 1000;
+    renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(animate);
+
+
+
+
+
+====================================
+
+
+
+import * as THREE from 'three';
+import { max } from 'three/src/nodes/math/MathNode.js';
+import {
+  WebGLRenderer, PerspectiveCamera, Scene, BoxGeometry, MeshPhongMaterial, Mesh, DirectionalLight,
+} from 'three';
+
+
+const scene = new THREE.Scene();        // FOV, aspect ratio            clipping plane: near  far   
+const camera = new THREE.PerspectiveCamera(75, window.screen.width / window.innerHeight, 0.1, 1000);
+
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const light = new DirectionalLight(0xFFFFFF, 1);
+light.position.set(0, 0, 2);
+scene.add(light);
+
+const geometry = new THREE.BoxGeometry(7, 20, 1);
+const material = new THREE.MeshBasicMaterial({color:0x00ff00});
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+camera.position.z = 10;
+
+
+const color = new THREE.Color().setRGB( 0.1, 0.2, 0.9 );
+cube.material.color = color;
+cube.position.x = 0;
+cube.position.y = 7;
+
+let num_cubes = 0;
+
+function getRndInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
+const max_x = Math.floor(33/2);
+let remaining_x = max_x;
+const xs = [];
+const max_cubes = getRndInteger(1, 10);
+
+function defineXs() {
+    let sum = 0;
+    while (xs.length < max_cubes && sum <= max_x) {
+        const size_x = getRndInteger(1, 5);
+        console.log(sum+ " " + size_x)
+        if (sum + size_x <= max_x) {
+            sum += size_x;
+            xs.push(size_x);
+        } else {
+            console.log("max");
+            break;
+        }
+    }
+}
+defineXs();
+num_cubes = xs.length;
+console.log(xs);
+const new_xs = shuffleArray(xs);
+
+function shuffleArray(array) {
+  let length = array.length;
+  let shuffle = array.slice(); // copy of array
+  // loop over the array
+  for (let i = length - 1; i > 0; i -= 1) {
+    let random = Math.floor(Math.random() * (i + 1)); // random card position
+    let current = shuffle[i]; // current card
+    // swap the random card and the current card
+    shuffle[i] = shuffle[random]; // move the random card to the current position
+    shuffle[random] = current; // put the current card in the random position
+  }
+  return shuffle; // return shuffled array
+};
+
+
+function defineCube(dube_number) {
+    const size_x = new_xs[cube_number];
+    const size_y = getRndInteger(2, 20);
+    const size_z = getRndInteger(1, 4);
+    
+    const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
+    const material = new THREE.MeshBasicMaterial();
+    const cube = new THREE.Mesh(geometry, material);
+    
+    cube.position.x = getRndInteger(-16, 16);
+    cube.position.y = 8;
+    //cube.position.z = getRndInteger(-16, 16);
+
+    cube.material.color = new THREE.Color().setRGB( Math.random(), Math.random(), Math.random());
+
+    scene.add(cube);
+}
+
+let cube_number = 0;
+
+function animate(time) {
+    //defineXs();
+    
+    if (num_cubes <= max_cubes) {
+        //let xs = [];
+        defineCube(cube_number);
+        //console.log(xs)
+        cube_number += 1;
+        num_cubes += 1;
+    } 
+    //increaseCube(cube)//.position.x = 1;
+    //cube.position.y = 2;
+    cube.rotation.x = time / 800;
+    cube.rotation.y = time / 1000;
+    renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(animate);
+

@@ -1,15 +1,16 @@
-DROP TABLE IF EXISTS game.users;
+DROP TABLE IF EXISTS sq3.users;
 
-CREATE TABLE IF NOT EXISTS game.users(
-    userId INTEGER AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR (50) NOT NULL UNIQUE, # email, min 5char+@
-    # userName VARCHAR (50),
-    password VARCHAR (50) NOT NULL,  # sha256
-    highScore INT DEFAULT(0),
-    lastOnline DATETIME NOT NULL,
-    isOnline BOOlEAN NOT NULL,
-    screenHeight INT NOT NULL, 
-    screenWidth INT NOT NULL,
-    opSys VARCHAR(64) NOT NULL,
-    2facode varchar(30) NOT NULL,
+CREATE TABLE IF NOT EXISTS main.users(
+    userId INTEGER PRIMARY KEY,
+    email VARCHAR (50) NOT NULL UNIQUE,
+    surname BLOB (50),
+    password VARCHAR (50) NOT NULL,
+    highScore INT NOT NULL DEFAULT(0),
+    lastOnline DATETIME,
+    isOnline INTEGER DEFAULT(0),
+    screenWidth INT,
+    screenHeight INT,
+    opSys VARCHAR(64),
+    twofaCode VARCHAR,
+    changePassword INTEGER DEFAULT (1)
 );

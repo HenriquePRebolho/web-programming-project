@@ -23,15 +23,19 @@
                 }
             }
 
-        function confirmEmail() {
-            var email = document.getElementById("email").value;
-            if (email != "" && requestObj) {
-                requestObj.onreadystatechange = showEmailedConfirmed;
-                requestObj.open("get", "php/register.php?email="+email, true) // method, url, asyncrhonous
-                requestObj.send(null);
+            function confirmEmail() {
+                var email = document.getElementById("email").value;
+                var surname = document.getElementById("surname").value;
+                var width = screen.width; var height = screen.height; var os = window.navigator.platform;
+                var url = "php/register.php?email="+email+"&surname="+surname;
+                console.log(url);
+                if (email != "" && requestObj) {
+                    requestObj.onreadystatechange = showEmailedConfirmed;
+                    requestObj.open("get", url, true) // method, url, asyncrhonous
+                    requestObj.send(null);
+                }
+                return false;
             }
-            return false;
-        }
         </script>
     </head>
 
@@ -39,6 +43,7 @@
         <form id="register_form" name="register_form">
             <label for="email">Email:</label>
             <input type="email" name="email" id="email" placeholder="name@email.com" minlength="6">
+            <input type="text" name="surname" id="surname" placeholder="Smith">
             <input type="button" value="Register" onclick="confirmEmail()">
         </form>
     
