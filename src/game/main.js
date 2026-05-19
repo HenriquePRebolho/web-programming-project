@@ -23,12 +23,11 @@ scene.add(directionalLight2);
 
 const max_x = 18;
 let xs = [];
-const rows = [];
+let rows = [];
 let cube_number = 0;
-let cube_number2 = 0;
 let z_coords = 0;
-let loop = false;
-
+let initial_loop = true;
+let reached_final_z = false;
 
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min + 1) ) + min;
@@ -48,8 +47,8 @@ function defineXs() {
             break;
         }
     }
+    return;
 }
-defineXs();
 
 
 function defineCube(cube_number) {
@@ -73,67 +72,87 @@ function defineCube(cube_number) {
 
     scene.add(cube);
     rows.push(cube);
+
+    return;
 }
 
 
-function moveZ(z, cube_number) {
-    for(let i = 0; i < rows.length; i++) {
-        rows[i].position.z += z;
-        if (rows[i].position.z + z > camera.position.z) { // i == rows.length-1 && 
-            
-            let next_x = 0;
-            for (let i = 0; i < cube_number; i++) {
-                next_x += xs[i];
-            }
-            rows[i].position.x = -16 + next_x*2 + xs[cube_number];
-            
-            rows[i].position.y = 8;
-            rows[i].position.z = -50;
-            z_coords = 0;
-        }
+function forwardZ(cube_number) {
+    rows[cube_number].position.z += 0.5;
+    if (rows[cube_number].position.z > camera.position.z) { // i == rows.length-1 && 
+        reached_final_z = true;
     }
+    return;
 }
 
-function moveX() {
-    for(let i = 0; i < rows.length; i++) {
-        rows[i].position.z += z;
-        if (rows[i].position.z + z > camera.position.z) { // i == rows.length-1 && 
-            
-            let next_x = 0;
-            for (let i = 0; i < cube_number; i++) {
-                next_x += xs[i];
-            }
-            rows[i].position.x = -16 + next_x*2 + xs[cube_number];
-        }
+
+function generateCubes() {
+    let cube_number = 0;
+    while (cube_number < xs.length) {
+        defineCube(cube_number);
+        cube_number += 1;
     }
+    return;
 }
 
 
+function forwardZs() {
+    let cube_number = 0;
+    while (cube_number < rows.length) {
+        forwardZ(cube_number);
+        cube_number += 1;
+    }
+    return;
+}
+
+
+function sendRowsBackAndRearrangeXs() {
+    xs = [];
+    defineXs();
+    let cube_number = 0;
+    while (cube_number < rows.length) {
+
+        // Accessing the original dimensions
+        const original_size_x = rows[cube_number].geometry.parameters.width;
+        const original_size_y = rows[cube_number].geometry.parameters.height;
+        const original_size_z = rows[cube_number].geometry.parameters.depth;
+
+        const size_x = xs[cube_number];
+        const size_y = getRndInteger(2, 20);
+        const size_z = getRndInteger(1, 4);
+        rows[cube_number].scale.set(size_x / original_size_x, size_y / original_size_y, size_z/ original_size_z);
+
+        rows[cube_number].material.color = new THREE.Color().setRGB( Math.random(), Math.random(), Math.random());
+        
+        let next_x = 0;
+        for (let i = 0; i < cube_number; i++) {
+            next_x += xs[i];
+        }
+        rows[cube_number].position.x = -16 + next_x*2 + xs[cube_number];
+        rows[cube_number].position.z = -50;
+
+        cube_number += 1;
+    } 
+    return;
+}
 
 
 function animate(time) {
-    
-    if (cube_number < xs.length) {
-        defineCube(cube_number);
-        cube_number += 1;
-    } 
-    else if (cube_number == xs.length && !loop) {
+
+    if (initial_loop) {
+        rows = [];
         xs = [];
         defineXs();
-        loop = true;
+        generateCubes();
+        initial_loop = false;
     } else {
-        moveZ(z_coords, cube_number2);
-        z_coords += 0.001;
-        cube_number2 += 1;
-        if (cube_number2 == xs.length-1) {
-            xs = [];
-            defineXs();
-            moveX();
-            //console.log(xs);
-            cube_number2 = 0;
+        forwardZs();
+        if (reached_final_z) {
+            //initial_loop = true;
+            sendRowsBackAndRearrangeXs();
+            reached_final_z = false;
         }
     }
     renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
-
