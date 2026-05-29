@@ -35,6 +35,13 @@ let cube_number = 0;
 let z_coords = 0;
 let initial_loop = true;
 let reached_final_z = -1;
+let isWebInScene = false;
+let shootingWeb = false;
+let attachedCube;
+let cameraCollision = false;
+let pendulumAngle;      // current angle from vertical
+let angularVelocity;    // how fast the angle is changing
+let ropeLength;
 
 
 function getRndInteger(min, max) {
@@ -83,41 +90,86 @@ function defineCube(row, cube_number) {
     return;
 }
 
+let web;
+let webX = 0.1; let webY = 0.05; let webZ = 0.1; let webGrowFactor = 1;
+function generateWeb() {
+    const geometry = new THREE.BoxGeometry(webX, webY, webZ);
+    const material = new THREE.MeshLambertMaterial({  emissive: 0x000000, });
+    web = new THREE.Mesh(geometry, material);
+
+    web.material.color = new THREE.Color().setRGB(1, 1, 1);
+    return;
+}
+generateWeb();
+
+function addWebToScene() {
+    web.position.x = camera.position.x;
+    web.position.y = camera.position.y;
+    web.position.z = 9;
+
+    // rotate x and z based on mouse position
+    const screenWidth = window.screen.width;
+    const screenHeight = window.screen.height;
+    
+    const ndcX = (mouseX / window.innerWidth) * 2 - 1;   // -1 (left) to +1 (right)
+    const ndcY = -(mouseY / window.innerHeight) * 2 + 1;  // -1 (bottom) to +1 (top)
+
+    web.rotation.z = -Math.atan2(ndcX, ndcY); // tilt left/right
+    web.rotation.x = -Math.PI / 4;    // tilt up/down
+
+    scene.add(web);
+}
+
+
 
 function defineWorldBorder(border) {
-
     // 0: up, 1: down, 2: left, 3: right 
     const size_x = (border == 0 || border == 1) ? 40 : 2;
     const size_y = (border == 0 || border == 1) ? 2 : 40;
     const size_z = 650;
     
-    const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
-    const material = new THREE.MeshBasicMaterial();
-    const cube = new THREE.Mesh(geometry, material);
     
     if (border == 0) { // up
+        const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
+        const material = new THREE.MeshLambertMaterial({  emissive: 0x000000, });
+        const cube = new THREE.Mesh(geometry, material);
         cube.position.x = 0;
         cube.position.y = 10;
+        cube.position.z = 0;
         cube.material.color = new THREE.Color().setRGB(1, 0, 0);
+        scene.add(cube);
     } else if (border == 1) { // down
+        const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
+        const material = new THREE.MeshBasicMaterial();
+        const cube = new THREE.Mesh(geometry, material);
         cube.position.x = 0;
         cube.position.y = -10;
-        cube.material.color = new THREE.Color().setRGB(1, 1, 1);
+        cube.position.z = 0;
+        cube.material.color = new THREE.Color().setRGB(1, 0, 1);
+        scene.add(cube);
     } else if (border == 2) { // left
-        cube.position.x = -16;
+        const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
+        const material = new THREE.MeshLambertMaterial({  emissive: 0x000000, });
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.x = -18;
         cube.position.y = 0;
+        cube.position.z = 0;
         cube.material.color = new THREE.Color().setRGB(1, 0, 0);
+        scene.add(cube);
     } else { // right
-        cube.position.x = 16;
+        const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
+        const material = new THREE.MeshLambertMaterial({  emissive: 0x000000, });
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.x = 18;
         cube.position.y = 0;
+        cube.position.z = 0;
         cube.material.color = new THREE.Color().setRGB(1, 0, 0);
+        scene.add(cube);
     }
-    cube.position.z = 0;
+    //cube.position.z = 0;
 
     //cube.material.color = new THREE.Color().setRGB(1, 0, 0);
-    
-    console.log(cube);
-    scene.add(cube);
+
     return;
 }
 
@@ -130,6 +182,7 @@ function generateBorders() {
     }
     return;
 }
+generateBorders();
 
 function generateCubes(row) {
     let cube_number = 0;
@@ -195,6 +248,7 @@ function sendRowBackAndRearrangeXs(row) {
     return;
 }
 
+
 function defineRowsXs() {
     let row = 0;
     while (row < rows_number) {
@@ -203,6 +257,7 @@ function defineRowsXs() {
     }
     return;
 }
+
 
 function generateRowsCubes(){
     let row = 0;
@@ -214,15 +269,152 @@ function generateRowsCubes(){
 }
 
 
+function fall() {
+    camera.position.y -= 0.05;
+    return;
+}
+
+
+function scaleWeb() {
+    web.scale.y += webGrowFactor;
+    const currentLength = webY * web.scale.y;
+
+    // Get the web's local "up" direction in world space
+    const direction = new THREE.Vector3(0, 1, 0);
+    direction.applyEuler(web.rotation);
+
+    // Pin base to camera, extend tip along the rotated direction
+    web.position.x = camera.position.x + direction.x * (currentLength / 2);
+    web.position.y = camera.position.y + direction.y * (currentLength / 2);
+    //web.position.z = camera.position.z + direction.z * (currentLength / 2);
+}
+
+
+function checkWebCollision() {
+    const webBox = new THREE.Box3().setFromObject(web);
+    for (let row of rows) {
+        for (let cube of row) {
+            const cubeBB = new THREE.Box3().setFromObject(cube);
+            if (webBox.intersectsBox(cubeBB)) {
+                window.alert("web collision");
+                shootingWeb = false;
+                attachedCube = cube;
+
+                pendulumAngle = Math.atan2(
+                    camera.position.x - attachedCube.position.x,
+                    camera.position.y - attachedCube.position.y
+                );
+                ropeLength = camera.position.distanceTo(anchorPoint);
+                angularVelocity = 0.03; // initial push, tune this
+
+                return;
+            }
+        }
+    }
+}
+
+
+function moveCamera() {
+    const GRAVITY = 0.001; // tune for feel
+
+    // Gravity pulls angle back toward vertical
+    angularVelocity -= (GRAVITY / ropeLength) * Math.sin(pendulumAngle);
+
+    pendulumAngle += angularVelocity;
+
+    // Camera orbits around anchor
+    camera.position.x = anchorPoint.x + ropeLength * Math.sin(pendulumAngle);
+    camera.position.y = anchorPoint.y - ropeLength * Math.cos(pendulumAngle);
+}
+
+// todo: borders as well
+function checkCameraCollision() {
+    let row = 0;
+    while (row < rows_number) {
+        let cube_number = 0;
+        while (cube_number < rows.length) {
+            if (rows[row][cube_number].position.z == 9) { // if block in "same" z as camera z
+                if ((rows[row][cube_number].position.x <= camera.position.x - 1 ||  
+                     rows[row][cube_number].position.x >= camera.position.x + 1) &&
+                    (8 - rows[row][cube_number].size.y >= camera.position.y - 1 ||  
+                     8 - rows[row][cube_number].size.y <= camera.position.y + 1)) 
+                {
+                    cameraCollision = true;
+                    break;
+                }
+            }
+            cube_number += 1;
+        }
+        if (cameraCollision) {
+            break;
+        }
+        row += 1;
+    }
+    return;
+}
+
+
+function destroyWeb() {
+    scene.remove(web);
+    web.scale.set(1, 1, 1);
+    web.rotation.set(0, 0, 0);
+}
+
+
+let mouseDown = false;
+document.addEventListener('mousedown', (e) => {
+    if (e.button === 0) {
+        mouseDown = true;
+    }
+})
+document.addEventListener('mouseup', (e) => {
+    if (e.button === 0) {
+        mouseDown = false;
+    }
+})
+
+let mouseX = 0;
+let mouseY = 0;
+document.addEventListener('mousemove', function(event) {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+});
+
+
 
 
 function animate(time) {
+    if (mouseDown) {
+        if (!isWebInScene) {
+            addWebToScene();
+            isWebInScene = true;
+            shootingWeb = true;
+        }
+        else {
+            if (shootingWeb) {
+                fall();
+                scaleWeb();
+                checkWebCollision();
+            } else {
+                moveCamera();
+                forwardZs();
+                checkCameraCollision();
+                
+                window.alert("here");
+            }
+        } 
+    } else {
+        destroyWeb();
+        // fall();
+        isWebInScene = false;
+    }
+
+    console.log(camera.position.y + " " + web.position.y);
 
     if (initial_loop) {
         rows = [[], [], [], [], [], [], [], [], [], []];
         xs = [[], [], [], [], [], [], [], [], [], []];
         defineRowsXs();
-        generateBorders();
         generateRowsCubes();
         initial_loop = false;
     } else {
@@ -233,5 +425,20 @@ function animate(time) {
         }
     }
     renderer.render(scene, camera);
+    if (cameraCollision) {
+        window.alert("you lost :(");
+    } 
 }
 renderer.setAnimationLoop(animate);
+
+
+
+
+// detect mouse left input
+// get mouse coordinates
+// create "web"
+// expand "web" until collision
+// "move" (!= retract) "web" in real way --> move camera x,y and moveZs
+// if mouse left not holding
+//      delete web
+//      
