@@ -3,6 +3,8 @@ import {
   WebGLRenderer, PerspectiveCamera, Scene, BoxGeometry, MeshPhongMaterial, Mesh, DirectionalLight,
 } from 'three';
 
+////////////////////////////////////
+// SCENE ///////////////////////////
 const scene = new THREE.Scene();        // FOV, aspect ratio            clipping plane: near  far   
 const camera = new THREE.PerspectiveCamera(75, window.screen.width / window.innerHeight, 0.1, 1000);
 camera.position.z = 10;
@@ -25,7 +27,12 @@ scene.add(directionalLight2);
 const directionalLight3 = new THREE.DirectionalLight( 0xf1ffff, 10 );
 directionalLight3.position.set(0, -10, -20);
 scene.add(directionalLight3);
+////////////////////////////////////
 
+
+
+////////////////////////////////////
+// VARIABLES ///////////////////////
 
 const max_x = 18;
 const rows_number = 10;
@@ -42,14 +49,29 @@ let cameraCollision = false;
 let pendulumAngle;      // current angle from vertical
 let angularVelocity;    // how fast the angle is changing
 let ropeLength;
+let mouseX = 0;
+let mouseY = 0;
+let mouseDown = false;
+let web;
+let webX = 0.1; 
+let webY = 0.05; 
+let webZ = 0.1; 
+let webGrowFactor = 1;
+////////////////////////////////////
 
 
-function getRndInteger(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) ) + min;
+////////////////////////////////////
+// BLOCKS //////////////////////////
+function defineRowsXs() {
+    let row = 0;
+    while (row < rows_number) {
+        defineXs(row);
+        row += 1;
+    }
+    return;
 }
 
-// Define a list of sizes x for each cube without letting them occupy more the what the screen can show
-// Problem: objects from far will look like they have no wall 
+
 function defineXs(row) {
     let sum = 0;
     while (sum <= max_x) {
@@ -60,6 +82,26 @@ function defineXs(row) {
         } else {
             break;
         }
+    }
+    return;
+}
+
+
+function generateRowsCubes(){
+    let row = 0;
+    while (row < rows_number) {
+        generateCubes(row);
+        row += 1;
+    }
+    return;
+}
+
+
+function generateCubes(row) {
+    let cube_number = 0;
+    while (cube_number < xs.length) {
+        defineCube(row, cube_number);
+        cube_number += 1;
     }
     return;
 }
@@ -90,38 +132,65 @@ function defineCube(row, cube_number) {
     return;
 }
 
-let web;
-let webX = 0.1; let webY = 0.05; let webZ = 0.1; let webGrowFactor = 1;
-function generateWeb() {
-    const geometry = new THREE.BoxGeometry(webX, webY, webZ);
-    const material = new THREE.MeshLambertMaterial({  emissive: 0x000000, });
-    web = new THREE.Mesh(geometry, material);
 
-    web.material.color = new THREE.Color().setRGB(1, 1, 1);
+function forwardZs() {
+    let row = 0;
+    while (row < rows_number) {
+        let cube_number = 0;
+        while (cube_number < rows.length) {
+            forwardZ(row, cube_number);
+            cube_number += 1;
+        }
+        row += 1;
+    }
     return;
 }
-generateWeb();
 
-function addWebToScene() {
-    web.position.x = camera.position.x;
-    web.position.y = camera.position.y;
-    web.position.z = 9;
 
-    // rotate x and z based on mouse position
-    const screenWidth = window.screen.width;
-    const screenHeight = window.screen.height;
-    
-    const ndcX = (mouseX / window.innerWidth) * 2 - 1;   // -1 (left) to +1 (right)
-    const ndcY = -(mouseY / window.innerHeight) * 2 + 1;  // -1 (bottom) to +1 (top)
-
-    web.rotation.z = -Math.atan2(ndcX, ndcY); // tilt left/right
-    web.rotation.x = -Math.PI / 4;    // tilt up/down
-
-    scene.add(web);
+function forwardZ(row, cube_number) {
+    rows[row][cube_number].position.z += 0.1;
+    if (rows[row][cube_number].position.z > camera.position.z) { // i == rows.length-1 && 
+        reached_final_z = row;
+    }
+    return;
 }
 
 
+function sendRowBackAndRearrangeXs(row) {
+    xs = [[], [], [], [], [], [], [], [], [], []];
+    defineXs(row);
+    let cube_number = 0;
+    while (cube_number < rows[row].length) {
 
+        // Accessing the original dimensions
+        const original_size_x = rows[row][cube_number].geometry.parameters.width;
+        const original_size_y = rows[row][cube_number].geometry.parameters.height;
+        const original_size_z = rows[row][cube_number].geometry.parameters.depth;
+
+        const size_x = xs[row][cube_number];
+        const size_y = getRndInteger(2, 20);
+        const size_z = getRndInteger(1, 4);
+        rows[row][cube_number].scale.set(size_x / original_size_x, size_y / original_size_y, size_z/ original_size_z);
+
+        rows[row][cube_number].material.color = new THREE.Color().setRGB( Math.random(), Math.random(), Math.random());
+
+        let next_x = 0;
+        for (let i = 0; i < cube_number; i++) {
+            next_x += xs[row][i];
+        }
+        rows[row][cube_number].position.x = -16 + next_x*2 + xs[cube_number];
+        rows[row][cube_number].position.z = -50;
+
+        cube_number += 1;
+    }
+    reached_final_z = -1;
+    return;
+}
+////////////////////////////////////
+
+
+////////////////////////////////////
+// BORDERS /////////////////////////
 function defineWorldBorder(border) {
     // 0: up, 1: down, 2: left, 3: right 
     const size_x = (border == 0 || border == 1) ? 40 : 2;
@@ -182,96 +251,37 @@ function generateBorders() {
     }
     return;
 }
-generateBorders();
+////////////////////////////////////
 
-function generateCubes(row) {
-    let cube_number = 0;
-    while (cube_number < xs.length) {
-        defineCube(row, cube_number);
-        cube_number += 1;
-    }
+
+////////////////////////////////////
+// WEB /////////////////////////////
+function generateWeb() {
+    const geometry = new THREE.BoxGeometry(webX, webY, webZ);
+    const material = new THREE.MeshLambertMaterial({  emissive: 0x000000, });
+    web = new THREE.Mesh(geometry, material);
+
+    web.material.color = new THREE.Color().setRGB(1, 1, 1);
     return;
 }
 
 
-function forwardZ(row, cube_number) {
-    rows[row][cube_number].position.z += 0.1;
-    if (rows[row][cube_number].position.z > camera.position.z) { // i == rows.length-1 && 
-        reached_final_z = row;
-    }
-    return;
-}
+function addWebToScene() {
+    web.position.x = camera.position.x;
+    web.position.y = camera.position.y;
+    web.position.z = 9;
 
+    // rotate x and z based on mouse position
+    const screenWidth = window.screen.width;
+    const screenHeight = window.screen.height;
+    
+    const ndcX = (mouseX / window.innerWidth) * 2 - 1;   // -1 (left) to +1 (right)
+    const ndcY = -(mouseY / window.innerHeight) * 2 + 1;  // -1 (bottom) to +1 (top)
 
-function forwardZs() {
-    let row = 0;
-    while (row < rows_number) {
-        let cube_number = 0;
-        while (cube_number < rows.length) {
-            forwardZ(row, cube_number);
-            cube_number += 1;
-        }
-        row += 1;
-    }
-    return;
-}
+    web.rotation.z = -Math.atan2(ndcX, ndcY); // tilt left/right
+    web.rotation.x = -Math.PI / 4;    // tilt up/down
 
-
-function sendRowBackAndRearrangeXs(row) {
-    xs = [[], [], [], [], [], [], [], [], [], []];
-    defineXs(row);
-    let cube_number = 0;
-    while (cube_number < rows[row].length) {
-
-        // Accessing the original dimensions
-        const original_size_x = rows[row][cube_number].geometry.parameters.width;
-        const original_size_y = rows[row][cube_number].geometry.parameters.height;
-        const original_size_z = rows[row][cube_number].geometry.parameters.depth;
-
-        const size_x = xs[row][cube_number];
-        const size_y = getRndInteger(2, 20);
-        const size_z = getRndInteger(1, 4);
-        rows[row][cube_number].scale.set(size_x / original_size_x, size_y / original_size_y, size_z/ original_size_z);
-
-        rows[row][cube_number].material.color = new THREE.Color().setRGB( Math.random(), Math.random(), Math.random());
-
-        let next_x = 0;
-        for (let i = 0; i < cube_number; i++) {
-            next_x += xs[row][i];
-        }
-        rows[row][cube_number].position.x = -16 + next_x*2 + xs[cube_number];
-        rows[row][cube_number].position.z = -50;
-
-        cube_number += 1;
-    }
-    reached_final_z = -1;
-    return;
-}
-
-
-function defineRowsXs() {
-    let row = 0;
-    while (row < rows_number) {
-        defineXs(row);
-        row += 1;
-    }
-    return;
-}
-
-
-function generateRowsCubes(){
-    let row = 0;
-    while (row < rows_number) {
-        generateCubes(row);
-        row += 1;
-    }
-    return;
-}
-
-
-function fall() {
-    camera.position.y -= 0.05;
-    return;
+    scene.add(web);
 }
 
 
@@ -314,6 +324,22 @@ function checkWebCollision() {
 }
 
 
+function destroyWeb() {
+    scene.remove(web);
+    web.scale.set(1, 1, 1);
+    web.rotation.set(0, 0, 0);
+}
+////////////////////////////////////
+
+
+////////////////////////////////////
+// CAMERA ///////////////////////
+function fall() {
+    camera.position.y -= 0.05;
+    return;
+}
+
+
 function moveCamera() {
     const GRAVITY = 0.001; // tune for feel
 
@@ -352,16 +378,11 @@ function checkCameraCollision() {
     }
     return;
 }
+////////////////////////////////////
 
 
-function destroyWeb() {
-    scene.remove(web);
-    web.scale.set(1, 1, 1);
-    web.rotation.set(0, 0, 0);
-}
-
-
-let mouseDown = false;
+////////////////////////////////////
+// LISTENERS ///////////////////////
 document.addEventListener('mousedown', (e) => {
     if (e.button === 0) {
         mouseDown = true;
@@ -372,17 +393,30 @@ document.addEventListener('mouseup', (e) => {
         mouseDown = false;
     }
 })
-
-let mouseX = 0;
-let mouseY = 0;
 document.addEventListener('mousemove', function(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
 });
+////////////////////////////////////
 
 
+////////////////////////////////////
+// AUX /////////////////////////////
+function getRndInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+////////////////////////////////////
 
 
+////////////////////////////////////
+// METHOD CALLS ////////////////////
+generateBorders();
+generateWeb();
+////////////////////////////////////
+
+
+////////////////////////////////////
+// ANIMATION ///////////////////////
 function animate(time) {
     if (mouseDown) {
         if (!isWebInScene) {
@@ -430,15 +464,4 @@ function animate(time) {
     } 
 }
 renderer.setAnimationLoop(animate);
-
-
-
-
-// detect mouse left input
-// get mouse coordinates
-// create "web"
-// expand "web" until collision
-// "move" (!= retract) "web" in real way --> move camera x,y and moveZs
-// if mouse left not holding
-//      delete web
-//      
+////////////////////////////////////
