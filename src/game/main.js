@@ -7,6 +7,7 @@ import {
 // SCENE ///////////////////////////
 const scene = new THREE.Scene();        // FOV, aspect ratio            clipping plane: near  far   
 const camera = new THREE.PerspectiveCamera(75, window.screen.width / window.innerHeight, 0.1, 1000);
+const cameraBox = new THREE.Box3();
 camera.position.z = 10;
 
 const renderer = new THREE.WebGLRenderer();
@@ -30,10 +31,8 @@ scene.add(directionalLight3);
 ////////////////////////////////////
 
 
-
 ////////////////////////////////////
 // VARIABLES ///////////////////////
-
 const max_x = 18;
 const rows_number = 10;
 let xs = [[], [], [], [], [], [], [], [], [], []];
@@ -56,7 +55,11 @@ let web;
 let webX = 0.1; 
 let webY = 0.05; 
 let webZ = 0.1; 
-let webGrowFactor = 1;
+let webSpeed = 7;
+let anchorPoint;
+let borders = [];
+let anchorBlockZ;
+let points = 0;
 ////////////////////////////////////
 
 
@@ -109,7 +112,7 @@ function generateCubes(row) {
 
 function defineCube(row, cube_number) {
     const size_x = xs[row][cube_number];
-    const size_y = getRndInteger(2, 20);  // 40, 70
+    const size_y = getRndInteger(2, 20);
     const size_z = getRndInteger(1, 4);
     
     const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
@@ -133,12 +136,12 @@ function defineCube(row, cube_number) {
 }
 
 
-function forwardZs() {
+function forwardZs(speed) {
     let row = 0;
     while (row < rows_number) {
         let cube_number = 0;
         while (cube_number < rows.length) {
-            forwardZ(row, cube_number);
+            forwardZ(row, cube_number, speed);
             cube_number += 1;
         }
         row += 1;
@@ -147,8 +150,8 @@ function forwardZs() {
 }
 
 
-function forwardZ(row, cube_number) {
-    rows[row][cube_number].position.z += 0.1;
+function forwardZ(row, cube_number, speed) {
+    rows[row][cube_number].position.z += speed;
     if (rows[row][cube_number].position.z > camera.position.z) { // i == rows.length-1 && 
         reached_final_z = row;
     }
@@ -191,6 +194,16 @@ function sendRowBackAndRearrangeXs(row) {
 
 ////////////////////////////////////
 // BORDERS /////////////////////////
+function generateBorders() {
+    let border = 0; // 0: up, 1: down, 2: left, 3: right 
+    while (border < 4) {
+        defineWorldBorder(border);
+        border += 1;
+    }
+    return;
+}
+
+
 function defineWorldBorder(border) {
     // 0: up, 1: down, 2: left, 3: right 
     const size_x = (border == 0 || border == 1) ? 40 : 2;
@@ -207,15 +220,17 @@ function defineWorldBorder(border) {
         cube.position.z = 0;
         cube.material.color = new THREE.Color().setRGB(1, 0, 0);
         scene.add(cube);
+        borders.push(cube);
     } else if (border == 1) { // down
         const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
         const material = new THREE.MeshBasicMaterial();
         const cube = new THREE.Mesh(geometry, material);
         cube.position.x = 0;
-        cube.position.y = -10;
+        cube.position.y = -20;
         cube.position.z = 0;
         cube.material.color = new THREE.Color().setRGB(1, 0, 1);
         scene.add(cube);
+        borders.push(cube);
     } else if (border == 2) { // left
         const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
         const material = new THREE.MeshLambertMaterial({  emissive: 0x000000, });
@@ -225,6 +240,7 @@ function defineWorldBorder(border) {
         cube.position.z = 0;
         cube.material.color = new THREE.Color().setRGB(1, 0, 0);
         scene.add(cube);
+        borders.push(cube);
     } else { // right
         const geometry = new THREE.BoxGeometry(size_x, size_y, size_z);
         const material = new THREE.MeshLambertMaterial({  emissive: 0x000000, });
@@ -234,21 +250,12 @@ function defineWorldBorder(border) {
         cube.position.z = 0;
         cube.material.color = new THREE.Color().setRGB(1, 0, 0);
         scene.add(cube);
+        borders.push(cube);
     }
     //cube.position.z = 0;
 
     //cube.material.color = new THREE.Color().setRGB(1, 0, 0);
 
-    return;
-}
-
-
-function generateBorders() {
-    let border = 0; // 0: up, 1: down, 2: left, 3: right 
-    while (border < 4) {
-        defineWorldBorder(border);
-        border += 1;
-    }
     return;
 }
 ////////////////////////////////////
@@ -279,14 +286,14 @@ function addWebToScene() {
     const ndcY = -(mouseY / window.innerHeight) * 2 + 1;  // -1 (bottom) to +1 (top)
 
     web.rotation.z = -Math.atan2(ndcX, ndcY); // tilt left/right
-    web.rotation.x = -Math.PI / 4;    // tilt up/down
+    web.rotation.x = -Math.PI / 3;    // tilt up/down
 
     scene.add(web);
 }
 
 
 function scaleWeb() {
-    web.scale.y += webGrowFactor;
+    web.scale.y += webSpeed;
     const currentLength = webY * web.scale.y;
 
     // Get the web's local "up" direction in world space
@@ -301,22 +308,50 @@ function scaleWeb() {
 
 
 function checkWebCollision() {
-    const webBox = new THREE.Box3().setFromObject(web);
+    const direction = new THREE.Vector3(0, 1, 0);
+    direction.applyEuler(web.rotation);
+    const currentLength = 0.1 * web.scale.y;
+
+    // Compute actual tip and base in world space
+    const base = camera.position.clone();
+    const tip = new THREE.Vector3(
+        camera.position.x + direction.x * currentLength,
+        camera.position.y + direction.y * currentLength,
+        camera.position.z + direction.z * currentLength
+    );
+
+    // Build box from those two real points
+    const webBox = new THREE.Box3().setFromPoints([base, tip]);
+    webBox.expandByScalar(0.2); // small tolerance
+
     for (let row of rows) {
         for (let cube of row) {
+            cube.updateMatrixWorld();
             const cubeBB = new THREE.Box3().setFromObject(cube);
-            if (webBox.intersectsBox(cubeBB)) {
-                window.alert("web collision");
+            
+            if (webBox.intersectsBox(cubeBB) ||
+                webBox.intersectsBox(topBB) ||
+                webBox.intersectsBox(bottomBB) ||
+                webBox.intersectsBox(leftBB) ||
+                webBox.intersectsBox(rightBB)
+            ) {
                 shootingWeb = false;
                 attachedCube = cube;
-
-                pendulumAngle = Math.atan2(
-                    camera.position.x - attachedCube.position.x,
-                    camera.position.y - attachedCube.position.y
+                anchorPoint = tip.clone();
+                // In checkWebCollision(), replace ropeLength and pendulumAngle with:
+                const dx = camera.position.x - anchorPoint.x;
+                const dy = camera.position.y - anchorPoint.y;
+                ropeLength = Math.sqrt(dx * dx + dy * dy); // true distance from camera to anchor
+                pendulumAngle = Math.atan2(dx, -dy);       // angle consistent with sin/cos formula
+                // Inside checkWebCollision(), replace angularVelocity = 0.03 with:
+                const prevAngle = Math.atan2(
+                    camera.position.x - anchorPoint.x,
+                    camera.position.y - anchorPoint.y  // wait this is wrong
                 );
-                ropeLength = camera.position.distanceTo(anchorPoint);
-                angularVelocity = 0.03; // initial push, tune this
+                // Use the camera's current horizontal movement direction as initial kick
+                angularVelocity = -0.03 * Math.sign(camera.position.x - anchorPoint.x) || 0.03;
 
+                anchorBlockZ = attachedCube.position.z;
                 return;
             }
         }
@@ -335,48 +370,50 @@ function destroyWeb() {
 ////////////////////////////////////
 // CAMERA ///////////////////////
 function fall() {
-    camera.position.y -= 0.05;
+    camera.position.y -= 0.03;
     return;
 }
 
 
 function moveCamera() {
-    const GRAVITY = 0.001; // tune for feel
+    const GRAVITY = 0.005;
 
-    // Gravity pulls angle back toward vertical
     angularVelocity -= (GRAVITY / ropeLength) * Math.sin(pendulumAngle);
-
+    angularVelocity *= 0.99;
     pendulumAngle += angularVelocity;
+    pendulumAngle = Math.max(-Math.PI * 0.75, Math.min(Math.PI * 0.75, pendulumAngle));
 
-    // Camera orbits around anchor
     camera.position.x = anchorPoint.x + ropeLength * Math.sin(pendulumAngle);
     camera.position.y = anchorPoint.y - ropeLength * Math.cos(pendulumAngle);
+
+    // Boost camera up when pendulum loses energy
+    if (Math.abs(angularVelocity) < 0.005) {
+        camera.position.y += 1; // tune this
+        ropeLength = camera.position.distanceTo(anchorPoint); // keep rope consistent
+    }
 }
 
 // todo: borders as well
 function checkCameraCollision() {
-    let row = 0;
-    while (row < rows_number) {
-        let cube_number = 0;
-        while (cube_number < rows.length) {
-            if (rows[row][cube_number].position.z == 9) { // if block in "same" z as camera z
-                if ((rows[row][cube_number].position.x <= camera.position.x - 1 ||  
-                     rows[row][cube_number].position.x >= camera.position.x + 1) &&
-                    (8 - rows[row][cube_number].size.y >= camera.position.y - 1 ||  
-                     8 - rows[row][cube_number].size.y <= camera.position.y + 1)) 
-                {
-                    cameraCollision = true;
-                    break;
-                }
+    cameraBox.setFromCenterAndSize(
+        camera.position,
+        new THREE.Vector3(1, 1, 1) // tune this to feel right
+    );
+
+    for (let row of rows) {
+        for (let cube of row) {
+            const cubeBox = new THREE.Box3().setFromObject(cube);
+            if (cameraBox.intersectsBox(cubeBox) || 
+                cameraBox.intersectsBox(topBB) ||
+                cameraBox.intersectsBox(bottomBB) ||
+                cameraBox.intersectsBox(leftBB) ||
+                cameraBox.intersectsBox(rightBB)
+            ) {
+                cameraCollision = true;
+                return;
             }
-            cube_number += 1;
         }
-        if (cameraCollision) {
-            break;
-        }
-        row += 1;
     }
-    return;
 }
 ////////////////////////////////////
 
@@ -412,6 +449,16 @@ function getRndInteger(min, max) {
 // METHOD CALLS ////////////////////
 generateBorders();
 generateWeb();
+const topBB = new THREE.Box3().setFromObject(borders[0]);
+const bottomBB = new THREE.Box3().setFromObject(borders[1]);
+const leftBB = new THREE.Box3().setFromObject(borders[2]);
+const rightBB = new THREE.Box3().setFromObject(borders[3]);
+////////////////////////////////////
+
+
+////////////////////////////////////
+// TESTS ///////////////////////////
+
 ////////////////////////////////////
 
 
@@ -430,20 +477,24 @@ function animate(time) {
                 scaleWeb();
                 checkWebCollision();
             } else {
+                if (!shootingWeb && attachedCube) {
+                    if (Math.abs(attachedCube.position.z - anchorBlockZ) > 5) {
+                        // block was recycled to the back
+                        destroyWeb();
+                        isWebInScene = false;
+                        shootingWeb = false;
+                        attachedCube = null;
+                    }
+                }
                 moveCamera();
-                forwardZs();
-                checkCameraCollision();
-                
-                window.alert("here");
+                //forwardZs(0.01);
             }
         } 
     } else {
         destroyWeb();
-        // fall();
+        fall();
         isWebInScene = false;
     }
-
-    console.log(camera.position.y + " " + web.position.y);
 
     if (initial_loop) {
         rows = [[], [], [], [], [], [], [], [], [], []];
@@ -452,16 +503,22 @@ function animate(time) {
         generateRowsCubes();
         initial_loop = false;
     } else {
-        forwardZs();
+        forwardZs(0.1);
         if (reached_final_z !== -1) {
             sendRowBackAndRearrangeXs(reached_final_z);
-            //reached_final_z = -1;
         }
     }
     renderer.render(scene, camera);
+
+    points += 1;
+    
+    checkCameraCollision();
     if (cameraCollision) {
-        window.alert("you lost :(");
-    } 
+        points = Math.floor(points/60)
+        window.alert("you lost: " + points + " points");
+        return points;
+    }
 }
 renderer.setAnimationLoop(animate);
 ////////////////////////////////////
+

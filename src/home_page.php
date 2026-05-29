@@ -31,7 +31,8 @@
     </head>
 
     <body>
-        <h1>Welcome!</h1>
+        <h1>Welcome Mr/Mrs</h1>
+        
         <div id=output></div>
     </body>
 </html>
