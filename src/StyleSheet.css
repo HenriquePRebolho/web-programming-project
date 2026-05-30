@@ -1,0 +1,14 @@
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;        /* behind everything */
+}
+
+body > *:not(canvas) {
+    position: relative;
+    z-index: 1;        /* above canvas */
+}
+body {
+    text-align: center;
+}

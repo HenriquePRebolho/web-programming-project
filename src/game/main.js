@@ -9,6 +9,7 @@ const scene = new THREE.Scene();        // FOV, aspect ratio            clipping
 const camera = new THREE.PerspectiveCamera(75, window.screen.width / window.innerHeight, 0.1, 1000);
 const cameraBox = new THREE.Box3();
 camera.position.z = 10;
+camera.rotation.x = Math.PI / 36;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -59,7 +60,8 @@ let webSpeed = 7;
 let anchorPoint;
 let borders = [];
 let anchorBlockZ;
-let points = 0;
+let score = 0;
+let gameStarted = false;
 ////////////////////////////////////
 
 
@@ -415,6 +417,13 @@ function checkCameraCollision() {
         }
     }
 }
+
+
+function resetCamera() {
+    camera.position.x = 0;
+    camera.position.y = 0;
+    camera.position.z = 10;
+}
 ////////////////////////////////////
 
 
@@ -465,36 +474,48 @@ const rightBB = new THREE.Box3().setFromObject(borders[3]);
 ////////////////////////////////////
 // ANIMATION ///////////////////////
 function animate(time) {
-    if (mouseDown) {
-        if (!isWebInScene) {
-            addWebToScene();
-            isWebInScene = true;
-            shootingWeb = true;
-        }
-        else {
-            if (shootingWeb) {
-                fall();
-                scaleWeb();
-                checkWebCollision();
-            } else {
-                if (!shootingWeb && attachedCube) {
-                    if (Math.abs(attachedCube.position.z - anchorBlockZ) > 5) {
-                        // block was recycled to the back
-                        destroyWeb();
-                        isWebInScene = false;
-                        shootingWeb = false;
-                        attachedCube = null;
-                    }
-                }
-                moveCamera();
-                //forwardZs(0.01);
+    if (gameStarted) {
+        if (mouseDown) {
+            if (!isWebInScene) {
+                addWebToScene();
+                isWebInScene = true;
+                shootingWeb = true;
             }
-        } 
-    } else {
-        destroyWeb();
-        fall();
-        isWebInScene = false;
+            else {
+                if (shootingWeb) {
+                    fall();
+                    scaleWeb();
+                    checkWebCollision();
+                } else {
+                    if (!shootingWeb && attachedCube) {
+                        if (Math.abs(attachedCube.position.z - anchorBlockZ) > 5) {
+                            // block was recycled to the back
+                            destroyWeb();
+                            isWebInScene = false;
+                            shootingWeb = false;
+                            attachedCube = null;
+                        }
+                    }
+                    moveCamera();
+                    //forwardZs(0.01);
+                }
+            } 
+        } else {
+            destroyWeb();
+            fall();
+            isWebInScene = false;
+        }
+
+        score += 1;
+        checkCameraCollision();
+        if (cameraCollision) {
+            score = Math.floor(score/60);
+            gameStarted = false;
+            resetCamera();
+            if (window.onGameOver) window.onGameOver(score);
+        }
     }
+
 
     if (initial_loop) {
         rows = [[], [], [], [], [], [], [], [], [], []];
@@ -509,16 +530,29 @@ function animate(time) {
         }
     }
     renderer.render(scene, camera);
-
-    points += 1;
-    
-    checkCameraCollision();
-    if (cameraCollision) {
-        points = Math.floor(points/60)
-        window.alert("you lost: " + points + " points");
-        return points;
-    }
 }
 renderer.setAnimationLoop(animate);
 ////////////////////////////////////
 
+
+window.onStartGame = function() {
+    gameStarted = true;
+
+    // Reset score
+    score = 0;
+    
+    // Reset web state
+    destroyWeb();
+    isWebInScene = false;
+    shootingWeb = false;
+    attachedCube = null;
+    
+    // Reset camera
+    resetCamera();
+    
+    // Reset physics
+    cameraCollision = false;
+    pendulumAngle = null;
+    angularVelocity = null;
+    ropeLength = null;
+}

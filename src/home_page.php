@@ -16,13 +16,17 @@
         <!-- JQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+        <!-- CSS -->
+        <link href="..\extern\bootstrap\css\bootstrap-grid.min.css" rel="stylesheet">
+        <link href="./StyleSheet.css" rel="stylesheet">
+
         <script type="text/javascript">
             $( document ).ready(function() { // wait until page is loaded
                 setInterval(function(){  // execute every 1s (param 2)
                     $.get("./php/online_users.php",
                         {  }, // data passed to servers
                         function (data) {
-                            $('#output').html(data); 
+                            $('#online_users').html(data); 
                         }
                     );
                 }, 1000); // speed update of 1s
@@ -50,6 +54,16 @@
                 }
             );
         </script>
+
+        <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.176.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.176.0/examples/jsm/"
+            }
+        }
+        </script>
+        <script type="module" src="game/main.js"></script>
     </head>
 
     <body>
@@ -58,12 +72,14 @@
         <form action="php/logout.php" method="POST" onsubmit="getDate()">
             <!-- Hidden field -->
             <input type="hidden" name="lastOnline" id="lastOnline">
-            <button type="submit"> Logout </button>
+            <button type="submit" id="logout"> Logout </button>
         </form>
         
-        <div id=output></div>
+        <div id=online_users></div>
 
         <div id=best_scores></div>
+
+        <button onclick="startGame()" id="play">Play</button>
     </body>
 </html>
 
@@ -81,5 +97,30 @@
         today = day + ' - ' + dd + '/' + mm + '/' + yyyy;
 
         document.getElementById("lastOnline").value = today;
+    }
+
+    function startGame() {
+        document.getElementById('welcome').style.display = 'none';
+        document.getElementById('logout').style.display = 'none';
+        document.getElementById('online_users').style.display = 'none';
+        document.getElementById('play').style.display = 'none';
+        window.onStartGame();
+    }
+
+    function gameOver(score) {
+        document.getElementById('welcome').style.display = 'block';
+        document.getElementById('logout').style.display = 'block';
+        document.getElementById('online_users').style.display = 'block';
+        document.getElementById('play').style.display = 'block';
+
+        fetch('./php/save_score.php', {
+            method: 'POST',
+            body: new URLSearchParams({ score: score })
+        });
+    }
+
+    window.onGameOver = function(score) {
+        // restore UI + fetch save_score
+        gameOver(score);
     }
 </script>
