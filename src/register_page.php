@@ -40,11 +40,11 @@
     </head>
 
     <body>
-        <form id="register_form" name="register_form">
+        <form action="php/register.php" method="POST">
             <label for="email">Email:</label>
-            <input type="email" name="email" id="email" placeholder="name@email.com" minlength="6">
-            <input type="text" name="surname" id="surname" placeholder="Smith">
-            <input type="button" value="Register" onclick="confirmEmail()">
+            <input type="email" name="email" id="email" placeholder="name@email.com" minlength="6" required>
+            <input type="text" name="surname" id="surname" placeholder="Smith" required>
+            <input type="submit" value="Register">
         </form>
     
         <div id="sent"></div>

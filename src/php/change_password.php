@@ -1,10 +1,9 @@
 <?php 
-
     session_start();
 
     // Check if data is set
     if(!(isset($_SESSION['user_id']) || isset($_SESSION['email']))) {
-        die("Not authenticated");
+        header("Location: http://localhost/projects/Project/src/login_page.php");
     }
 
     // Check if email is valid

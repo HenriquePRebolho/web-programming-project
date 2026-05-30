@@ -43,7 +43,6 @@
 
         <a href="register_page.php" target="_self">New? Register here</a>
     
-
         <!-- TODO: make errors appear in login_page.php and not in login.php -->
         <div id="sent"></div>      
     </body>

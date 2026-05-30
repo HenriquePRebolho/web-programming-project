@@ -2,7 +2,7 @@
     session_start();
 
     if (!isset($_SESSION['user_id'])) {
-        die("Not authenticated");
+        header("Location: http://localhost/projects/Project/src/login_page.php");
     }
 ?>
 

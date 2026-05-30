@@ -3,7 +3,7 @@
 
     // Check if data is set
     if(!(isset($_SESSION['user_id']))) {
-        die("Not authenticated");
+        header("Location: http://localhost/projects/Project/src/login_page.php");
     }
 
     // Check if 2fa is set

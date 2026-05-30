@@ -21,7 +21,7 @@
     session_start();
 
     if (!isset($_SESSION['user_id'])) {
-        die("Not authenticated");
+        header("Location: http://localhost/projects/Project/src/login_page.php");
     }
 
     require_once '../extern/google_auth/PHPGangsta/GoogleAuthenticator.php';
