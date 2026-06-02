@@ -37,16 +37,52 @@
                 return false;
             }
         </script>
+
+        <!--<script type="text/javascript">
+            $( document ).ready(function() { // wait until page is loaded
+                setInterval(function(){  // execute every 1s (param 2)
+                    $.get("./php/check_email.php",
+                        {  }, // data passed to servers
+                        function (data) {
+                            $('#checkEmail').html(data); 
+                        }
+                    );
+                }, 1000); // speed update of 1s
+            });
+        </script> 
+        -->
+
+        <!-- CSS -->
+        <link href="../extern/bootstrap/css/bootstrap-grid.min.css" rel="stylesheet">
+        <link href="StyleSheet.css" rel="stylesheet">
     </head>
 
-    <body>
-        <form action="php/register.php" method="POST">
-            <label for="email">Email:</label>
-            <input type="email" name="email" id="email" placeholder="name@email.com" minlength="6" required>
-            <input type="text" name="surname" id="surname" placeholder="Smith" required>
-            <input type="submit" value="Register">
-        </form>
-    
-        <div id="sent"></div>
+    <body class="d-flex flex-column justify-content-center align-items-center vh-100 grey-color">
+
+        <h1 class="m-1" style="color: white;">Register</h1>
+
+        <div id="LoginBox" class="d-flex flex-column justify-content-center align-items-center light-grey-color p-4">
+            <form action="php/register.php" method="POST">
+                <div class="mb-3">
+                    <label for="email">Email</label> <br>
+                    <input type="email" name="email" id="email" placeholder="name@email.com" minlength="6" required>
+                    <!-- <div id="checkEmail"></div>  -->
+                </div>
+                <div class="mb-3">
+                    <label for="email">Surname</label> <br>
+                    <input type="text" name="surname" id="surname" placeholder="Smith" required>
+                </div>
+
+                <div class="d-flex justify-content-center mb-2">
+                    <button type="submit" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Register</button>
+                </div>
+
+                <div class="mt-0">
+                    Have an account?<a href="login_page.php" target="_self" style="font-size:11px; color: #007fd7">Login here</a>
+                </div>
+            </form>
+            
+            <div id="sent"></div>
+        </div>
     </body>
 </html>

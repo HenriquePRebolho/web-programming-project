@@ -1,7 +1,7 @@
 <?php
     session_start();
 
-    if (!isset($_SESSION['user_id'])) {
+    if (!isset($_SESSION['user_id'])) { // TODO: and qr code
         header("Location: http://localhost/projects/Project/src/login_page.php");
     }
 ?>
@@ -16,11 +16,8 @@
         <!-- JQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-        <!-- CSS -->
-        <link href="..\extern\bootstrap\css\bootstrap-grid.min.css" rel="stylesheet">
-        <link href="./StyleSheet.css" rel="stylesheet">
-
         <script type="text/javascript">
+            // Get amount of online users
             $( document ).ready(function() { // wait until page is loaded
                 setInterval(function(){  // execute every 1s (param 2)
                     $.get("./php/online_users.php",
@@ -31,9 +28,8 @@
                     );
                 }, 1000); // speed update of 1s
             });
-        </script>
 
-        <script type="text/javascript">
+            // Get best scores table
             $( document ).ready(function() { // wait until page is loaded
                 setInterval(function(){  // execute every 1s (param 2)
                     $.get("./php/best_scores.php",
@@ -44,9 +40,8 @@
                     );
                 }, 1000); // speed update of 1s
             });
-        </script>
 
-        <script type="text/javascript">
+            // Get welcome message
             $.get("./php/welcome.php",
                 {  }, // data passed to servers
                 function (data) {
@@ -56,30 +51,57 @@
         </script>
 
         <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.176.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.176.0/examples/jsm/"
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.176.0/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@0.176.0/examples/jsm/"
+                }
             }
-        }
         </script>
         <script type="module" src="game/main.js"></script>
+
+        <!-- CSS -->
+        <link href="..\extern\bootstrap\css\bootstrap-grid.min.css" rel="stylesheet">
+        <link href="./StyleSheet.css" rel="stylesheet">
+
+        <style>
+            canvas {
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 0;        /* behind everything */
+            }
+
+            body > *:not(canvas) {
+                position: relative;
+                z-index: 1;        /* above canvas */
+            }
+            body {
+                text-align: center;
+            }
+        </style>
     </head>
 
-    <body>
-        <div id=welcome></div>
+    <body class="d-flex flex-column justify-content-center align-items-center vh-100 grey-color">
+        <div id="welcome" class="mb-3"></div>
 
-        <form action="php/logout.php" method="POST" onsubmit="getDate()">
-            <!-- Hidden field -->
-            <input type="hidden" name="lastOnline" id="lastOnline">
-            <button type="submit" id="logout"> Logout </button>
-        </form>
+        <div class="mb-3">
+            <form action="php/logout.php" method="POST" onsubmit="getDate()">
+                <!-- Hidden field -->
+                <input type="hidden" name="lastOnline" id="lastOnline">
+                <div class="d-flex justify-content-center">
+                    <button type="submit" id="logout" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Logout</button>
+                </div>
+            </form>
+        </div>
         
-        <div id=online_users></div>
+        <div id=online_users class="mb-3"></div>
 
-        <div id=best_scores></div>
+        <div id=best_scores class="mb-3"></div>
 
-        <button onclick="startGame()" id="play">Play</button>
+        <div class="d-flex justify-content-center mt-3">
+            <button onclick="startGame()" id="play" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Play</button>
+        </div>
     </body>
 </html>
 

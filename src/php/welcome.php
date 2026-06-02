@@ -18,7 +18,7 @@
         $lastOnline = "<p>This is your first time online!</p>";
     }
 
-    echo("<h1>Welcome Mr/Mrs " . $user["surname"] . "!</h1>" . $lastOnline);
+    echo("<h1>Welcome Mr&nbsp/&nbspMrs &nbsp" . $user["surname"] . "!</h1>" . $lastOnline);
 
     unset($db);
 ?>

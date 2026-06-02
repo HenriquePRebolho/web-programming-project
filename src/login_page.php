@@ -7,15 +7,6 @@
         <title>Login</title>
 
         <script type="text/javascript">
-            function passwordVisibility() {
-                var password = document.getElementById("password")
-                if (password.type === "password") {
-                    password.type = "text";
-                } else {
-                    password.type = "password";
-                }
-            }
-
             function getDeviceInfo() {
                 document.getElementById("width").value = screen.width; 
                 document.getElementById("height").value = screen.height; 
@@ -25,34 +16,44 @@
         </script>
 
         <!-- CSS -->
-        <link href="..\extern\bootstrap\css\bootstrap-grid.min.css" rel="stylesheet">
-        <link href="./StyleSheet.css" rel="stylesheet">
+        <link href="../extern/bootstrap/css/bootstrap-grid.min.css" rel="stylesheet">
+        <link href="StyleSheet.css" rel="stylesheet">       
     </head>
 
-    <body>
-        <div style="width:100%; background-color:black" class="container text-center" >
-            <h1>Game</h1>
     
+    <body class="d-flex flex-column justify-content-center align-items-center vh-100 grey-color">
+
+        <h1 class="m-1" style="color: white;">Login</h1>
+
+        <div id="LoginBox" class="d-flex flex-column justify-content-center align-items-center light-grey-color p-4">
             <form action="php/login.php" method="POST" onsubmit="getDeviceInfo()">
-                <label for="email">Email:</label>
-                <input type="email" name="email" id="email" placeholder="name@email.com" minlength="6">
-                <br>
-                <label for="password">Password:</label>
-                <input type="password" name="password" id="password" placeholder="*********" minlength="">
-                <br>
-                <input type="checkbox" onclick="passwordVisibility()">
+                <div class="mb-3">
+                    <label for="email">Email</label> <br>
+                    <input type="email" name="email" id="email" placeholder="name@email.com" minlength="6">
+                </div>
+
+                <div class="mb-3">
+                    <label for="password">Password</label> <br>
+                    <input type="password" name="password" id="password" placeholder="*********" minlength="">
+                </div>
+                
                 <!-- Hidden fields -->
                 <input type="hidden" name="width" id="width">
                 <input type="hidden" name="height" id="height">
                 <input type="hidden" name="os" id="os">
 
-                <button type="submit">Login</button>
+                <div class="d-flex justify-content-center mb-2">
+                    <button type="submit" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Login</button>
+                </div>
             </form>
-
-            <a href="register_page.php" target="_self">New? Register here</a>
+            
+            <div class="mt-1">
+                <a href="register_page.php" target="_self" style="font-size:11px; color: #007fd7">New? Register here</a>
+            </div>
+  
+            
+            <!-- TODO: make errors appear in login_page.php and not in login.php -->    
+            <div id="sent"></div>
         </div>
-    
-        <!-- TODO: make errors appear in login_page.php and not in login.php -->
-        <div id="sent"></div>      
     </body>
 </html>
