@@ -82,26 +82,39 @@
         </style>
     </head>
 
-    <body class="d-flex flex-column justify-content-center align-items-center vh-100 grey-color">
-        <div id="welcome" class="mb-3"></div>
+    <body> <!-- id="GameMenuBox" -->
 
-        <div class="mb-3">
-            <form action="php/logout.php" method="POST" onsubmit="getDate()">
-                <!-- Hidden field -->
-                <input type="hidden" name="lastOnline" id="lastOnline">
-                <div class="d-flex justify-content-center">
-                    <button type="submit" id="logout" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Logout</button>
-                </div>
-            </form>
+        <div class="d-flex justify-content-between mb-5 mt-3 ms-3 me-3">
+            <div class="mt-4">
+                <form action="php/logout.php" method="POST" onsubmit="getDate()">
+                    <!-- Hidden field -->
+                    <input type="hidden" name="lastOnline" id="lastOnline">
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" id="logout" class="py-2 grey-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Logout</button>
+                    </div>
+                </form>
+            </div>
+
+            <div></div>
+
+            <div id=online_users class="ms-4" style="font-family: 'myFont'"></div>
+
+            <div id=best_scores></div>
+        </div>
+
+        <div class="d-flex flex-column justify-content-center align-items-center vh-100 mt-5">
+            
+            <div id="welcome" class="mb-3"></div>
+            
+            <div class="d-flex justify-content-center mb-3">
+                <button onclick="startGame()" id="play" class="py-2 blue-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Play</button>
+            </div>
+            
         </div>
         
-        <div id=online_users class="mb-3"></div>
+        
+        
 
-        <div id=best_scores class="mb-3"></div>
-
-        <div class="d-flex justify-content-center mt-3">
-            <button onclick="startGame()" id="play" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Play</button>
-        </div>
     </body>
 </html>
 

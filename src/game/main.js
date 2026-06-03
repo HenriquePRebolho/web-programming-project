@@ -395,7 +395,7 @@ function moveCamera() {
     }
 }
 
-// todo: borders as well
+
 function checkCameraCollision() {
     cameraBox.setFromCenterAndSize(
         camera.position,

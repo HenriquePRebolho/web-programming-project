@@ -28,11 +28,11 @@
 
     // 2. Build the HTML Table (with fixed closing tags)
     $table = "
-    <table>
-        <tr>
-            <th>Position</th>
-            <th>User</th>
-            <th>High Score</th>
+    <table style='user-select: none;'>
+        <tr style='user-select: none;'>
+            <th style='user-select: none;'>Position</th>
+            <th style='user-select: none;'>User</th>
+            <th style='user-select: none;'>High Score</th>
         </tr>";
 
     $inTopFive = false;
@@ -47,17 +47,17 @@
 
     foreach ($rows as $row) {
         // Optional: Highlight the current user's row style-wise
-        $isCurrent = ($row["email"] === $currentUserEmail) ? " style='background-color: #e0f7fa;'" : "";
+        $isCurrent = ($row["email"] === $currentUserEmail) ? " style='background-color: #e0f7fa; user-select: none;'" : "";
         
         // If this is the extra row for the user outside the top 5, add a visual separator
         if (!$inTopFive && $row["email"] === $currentUserEmail) {
-            $table .= "<tr><td colspan='3' style='text-align:center;'>...</td></tr>";
+            $table .= "<trstyle='user-select: none;' ><td colspan='3' style='text-align:center; user-select: none;'>...</td></tr>";
         }
 
         $table .= "<tr$isCurrent>
-            <td>" . $row["rank"] . "</td>
-            <td>" . $row["email"] . "</td>
-            <td>" . $row["highScore"] . "</td>
+            <td style='user-select: none;'>" . $row["rank"] . "</td>
+            <td style='user-select: none;'>" . $row["email"] . "</td>
+            <td style='user-select: none;'>" . $row["highScore"] . "</td>
         </tr>";
     }
 

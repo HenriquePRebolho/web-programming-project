@@ -37,6 +37,10 @@ button:active {
     border-radius: 10px;
 }
 
+/* #GameMenuBox {
+    position: relative;
+    color: #c1c1c182;
+} */
 
 
 
@@ -46,7 +50,7 @@ button:active {
     src: url("../assets/font/mightyspidey-font/Mightyspidey-pmaa.ttf")
          format("truetype");
 }
-h1, label, button, a {
+h1, label, button, a, p {
     font-family: "myFont", sans-serif;
 }
 

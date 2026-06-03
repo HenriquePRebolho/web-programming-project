@@ -6,7 +6,7 @@
     $result = $stmt -> execute();
     $usersOnline = $result -> fetchArray(SQLITE3_ASSOC);
     
-    echo("<br> Users online: ". $usersOnline['usersOnline'] ."<br>");
+    echo("<br> <p>Users online: ". $usersOnline['usersOnline'] ."</p>");
 
     unset($db);
     return;

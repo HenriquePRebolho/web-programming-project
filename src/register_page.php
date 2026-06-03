@@ -38,19 +38,41 @@
             }
         </script>
 
-        <!--<script type="text/javascript">
+        <!-- Check if email is registered -->
+        <script type="text/javascript">
             $( document ).ready(function() { // wait until page is loaded
                 setInterval(function(){  // execute every 1s (param 2)
                     $.get("./php/check_email.php",
-                        {  }, // data passed to servers
+                        { email: document.getElementById("email").value }, // data passed to servers
                         function (data) {
                             $('#checkEmail').html(data); 
                         }
                     );
                 }, 1000); // speed update of 1s
             });
-        </script> 
-        -->
+        </script>       
+
+
+        <!-- Deactivate button if email is registered -->
+        <script type="text/javascript">
+            $( document.getElementById('alreadyRegisterMsg') ).ready(function() { // wait msg is loaded
+                setInterval(
+                    function(){  // execute every 1s (param 2)
+                        const emailWarning = document.getElementById('alreadyRegisterMsg');
+                        console.log(emailWarning);
+
+                        if (emailWarning) {
+                            document.getElementById('registerBtn').disabled = true;
+                            document.getElementById('registerBtn').style.background = '#3f3f3f';
+                        } else {
+                            document.getElementById('registerBtn').disabled = false;
+                            document.getElementById('registerBtn').style.background = '#de0606';
+                        }
+                    }, 
+                    1000); // speed update of 1s
+            });    
+        </script>
+
 
         <!-- CSS -->
         <link href="../extern/bootstrap/css/bootstrap-grid.min.css" rel="stylesheet">
@@ -66,7 +88,7 @@
                 <div class="mb-3">
                     <label for="email">Email</label> <br>
                     <input type="email" name="email" id="email" placeholder="name@email.com" minlength="6" required>
-                    <!-- <div id="checkEmail"></div>  -->
+                    <div id="checkEmail"></div>
                 </div>
                 <div class="mb-3">
                     <label for="email">Surname</label> <br>
@@ -74,15 +96,15 @@
                 </div>
 
                 <div class="d-flex justify-content-center mb-2">
-                    <button type="submit" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Register</button>
+                    <button type="submit" id='registerBtn' class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Register</button>
                 </div>
 
                 <div class="mt-0">
                     Have an account?<a href="login_page.php" target="_self" style="font-size:11px; color: #007fd7">Login here</a>
                 </div>
             </form>
-            
-            <div id="sent"></div>
         </div>
+        <!-- TODO: msg in register page -->
+        <div id="sent"></div>
     </body>
 </html>

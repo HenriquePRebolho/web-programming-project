@@ -48,11 +48,10 @@
     unset($db); // delete variable and free space for usage 
 
 
-    // Define subject // TODO: change Webshop
-    $subject = "Webshop - Login details";
+    $subject = "Web Shooter Web - Login details";
 
-    // Define html message // TODO: change "Webshop"
-    $message = "<h1>Welcome to Webshop!</h1>
+    // Define html message
+    $message = "<h1>Welcome to Web Shooter Web!</h1>
                 <p>In order to activate your account, use this temporary password:</p>"
                 .$password;
     
@@ -69,11 +68,14 @@
         message: $message,
         additional_headers:  implode("\r\n", $headers)
     );
+
+    $returnMsg = ''; 
+    
     if($success) {
-        echo("Confirmation email sent successfully. <a href=http://localhost/projects/Project/src/login_page.php>Back to login page</a>");
-        return;
-        } else {
-        echo($errorMessage = error_get_last()['message']);
-        return;
+        $returnMsg = "Confirmation email sent successfully. <a href=http://localhost/projects/Project/src/login_page.php>Back to login page</a>";
+        return $returnMsg;
+    } else {
+        $returnMsg = $errorMessage = error_get_last()['message'];
+        return $returnMsg;
     }
 ?>
