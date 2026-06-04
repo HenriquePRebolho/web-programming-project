@@ -29,29 +29,31 @@
 
 
     // Update password
-    $db = new SQLite3('mydb.sq3');
+    require_once __DIR__ . '/db.php';
     $hashed_new_password = hash("sha512", $new_password);
-    $stmt = $db -> prepare("UPDATE users 
-                        SET password = :new_password, 
-                        changePassword = 0,
-                        screenWidth = :screenWidth,
-                        screenHeight = :screenHeight,
-                        opSys = :os,
-                        isOnline = 1,
-                        twofaCode = :twofa
-                        WHERE userId = :userId");
-    $stmt -> bindValue(':new_password', $hashed_new_password, SQLITE3_TEXT);
-    $stmt -> bindValue(':screenWidth', $width, SQLITE3_TEXT);
-    $stmt -> bindValue(':screenHeight', $height, SQLITE3_TEXT);
-    $stmt -> bindValue(':os', $os, SQLITE3_TEXT);
-    $stmt -> bindValue(':twofa', $twofa, SQLITE3_TEXT);
-    $stmt -> bindValue(':userId', $_SESSION['user_id'], SQLITE3_TEXT);
+    $stmt = $db->prepare("UPDATE users 
+                        SET password = ?,
+                            changePassword = 0,
+                            screenWidth = ?,
+                            screenHeight = ?,
+                            opSys = ?,
+                            isOnline = 1,
+                            twofaCode = ?
+                        WHERE userId = ?"
+    );
+    $stmt->bind_param("siissi",
+        $hashed_new_password,
+        $width,
+        $height,
+        $os,
+        $twofa,
+        $_SESSION['user_id']
+    );
+    $stmt->execute();
 
-    $result = $stmt -> execute();
-
-    unset($db);
+    $db->close();
 
     // Send user to home page
-    header("Location: http://localhost/projects/Project/src/enter_2fa_page.php");
+    header("Location: http://localhost/projects/Project/src/login_page.php");
     exit();
 ?>

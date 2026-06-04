@@ -16,13 +16,14 @@
     $twofa = $_POST['twofa'];
 
     // Get user 2FA
-    $db = new SQLite3('mydb.sq3');
-    $stmt = $db -> prepare("SELECT * FROM users WHERE userId = :userId");
-    $stmt -> bindValue(':userId', $userId, SQLITE3_TEXT);
-    $result = $stmt -> execute();
-    $user = $result -> fetchArray(SQLITE3_ASSOC);
+    require_once __DIR__ . '/db.php';
+    $stmt = $db -> prepare("SELECT * FROM users WHERE userId = ?");
+    $stmt -> bind_param('i', $userId);
+    $stmt -> execute();
+    $result = $stmt ->get_result();
+    $user = $result -> fetch_assoc();
     $secret = $user['twofaCode'];
-    unset($db);
+    
 
     require_once '../../extern/google_auth/PHPGangsta/GoogleAuthenticator.php';
     $checkResult=false;
@@ -31,13 +32,15 @@
     $checkResult= $ga -> verifyCode($secret, $twofa, 1); //1=30sec
 
     if($checkResult){
-        header("Location: ../home_page.php");
+        header("Location: http://localhost/projects/Project/src/home_page.php");
     } else {
         header("Location: ../enter_2fa_page.php");
     }
 
+    $db->close();
 
-    // Check 2FA
+
+/*     // Check 2FA
     $db = new SQLite3('mydb.sq3');
     $stmt = $db -> prepare("UPDATE users SET twofaCode = :twofa WHERE userId = :userId");
     $stmt -> bindValue(':userId', $_SESSION['user_id'], SQLITE3_TEXT);
@@ -48,7 +51,7 @@
 
     // Send user to home page
     header("Location: http://localhost/projects/Project/src/home_page.php");
-    exit();
+    exit(); */
 ?>
 
 

@@ -2,11 +2,12 @@
     $token = $_GET['token'] ?? '';
     $error = '';
 
-    $db = new SQLite3('php/mydb.sq3');
-    $stmt = $db -> prepare("SELECT userId, expiresAt FROM password_resets WHERE token = :token");
-    $stmt -> bindValue(":token", $token, SQLITE3_TEXT);
-    $result = $stmt -> execute();
-    $tokenInfo = $result -> fetchArray(SQLITE3_ASSOC);
+    require_once __DIR__ . '/php/db.php';
+    $stmt = $db -> prepare("SELECT userId, expiresAt FROM password_resets WHERE token = ?");
+    $stmt -> bind_param("s", $token);
+    $stmt -> execute();
+    $result = $stmt ->get_result();
+    $tokenInfo = $result -> fetch_assoc();
 
     if (!$tokenInfo || $tokenInfo['expiresAt'] < time()) {
         die("Invalid or expired link.");
@@ -27,21 +28,20 @@
         else {
             $hashed_new_password = hash("sha512", $new_password);
             $stmt = $db -> prepare("UPDATE users 
-                        SET password = :new_password
-                        WHERE userId = :userId");
-            $stmt -> bindValue(':new_password', $hashed_new_password, SQLITE3_TEXT);
-            $stmt -> bindValue(':userId', $tokenInfo['userId'], SQLITE3_INTEGER);
-            $result = $stmt -> execute();
-            if (!$result) {
-                die("Could not update password.");
+                        SET password = ?
+                        WHERE userId = ?");
+            $stmt -> bind_param('si', $hashed_new_password, $tokenInfo['userId']);
+            $stmt -> execute();
+            if ($db->affected_rows === 0) {
+                echo "Error in updating password.";
             }
-
+            
             // Delete token after use
-            $stmt = $db -> prepare("DELETE FROM password_resets WHERE token = :token");
-            $stmt  ->bindValue(":token", $token, SQLITE3_TEXT);
+            $stmt = $db -> prepare("DELETE FROM password_resets WHERE token = ?");
+            $stmt  -> bind_param("s", $token);
             $stmt -> execute();
 
-            unset($db);
+            $db->close();
 
             echo "Password updated! <a href='login_page.php'>Log in</a>";
             exit;

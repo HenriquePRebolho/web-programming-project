@@ -1,14 +1,14 @@
 <?php
     // Server side
-    $db = new SQLite3('mydb.sq3');
-    $count = "count()";
-    $stmt = $db -> prepare("SELECT COUNT(*) AS usersOnline FROM users WHERE isOnline = 1");
-    $result = $stmt -> execute();
-    $usersOnline = $result -> fetchArray(SQLITE3_ASSOC);
+    require_once __DIR__ . '/db.php';
+    $stmt = $db->prepare("SELECT COUNT(*) AS usersOnline FROM users WHERE isOnline = 1");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $usersOnline = $result->fetch_assoc();
+    $db->close();
     
     echo("<br> <p>Users online: ". $usersOnline['usersOnline'] ."</p>");
 
-    unset($db);
     return;
 ?>
 

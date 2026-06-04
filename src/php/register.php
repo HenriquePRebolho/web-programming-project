@@ -14,11 +14,12 @@
     $surname = $_POST["surname"];
 
     // Check if email is registered
-    $db = new SQLite3('mydb.sq3');
-    $stmt = $db -> prepare("SELECT * FROM users WHERE email = :email");
-    $stmt -> bindValue(':email', $email, SQLITE3_TEXT);
-    $result = $stmt -> execute();
-    $user = $result -> fetchArray(SQLITE3_ASSOC);
+    require_once __DIR__ . '/db.php';
+    $stmt = $db -> prepare("SELECT * FROM users WHERE email = ?");
+    $stmt -> bind_param('s', $email);
+    $stmt -> execute();
+    $result = $stmt ->get_result();
+    $user = $result -> fetch_assoc();
     if ($user) {
         die("Email already registered.");
     }
@@ -36,17 +37,13 @@
     $hashed_password = hash('sha512', $password);
 
     // Create user on database
-    $stmt =  $db -> prepare ("INSERT INTO users (email, surname, password) VALUES (:email, :surname, :hashed_password)");
-    $stmt -> bindValue(':email', $email, SQLITE3_TEXT);
-    $stmt -> bindValue(':surname', $surname, SQLITE3_TEXT);
-    $stmt -> bindValue(':hashed_password', $hashed_password, SQLITE3_TEXT);
-    $result = $stmt -> execute();
-    if (!$result) {
-        echo("Could not create.");
-        return;
+    $stmt =  $db -> prepare ("INSERT INTO users (email, surname, password) VALUES (?, ?, ?)");
+    $stmt -> bind_param('sss', $email, $surname, $hashed_password);
+    $stmt -> execute();
+    if ($db->affected_rows === 0) {
+        echo "Could not create.";
     }
-    unset($db); // delete variable and free space for usage 
-
+    $db->close();
 
     $subject = "Web Shooter Web - Login details";
 

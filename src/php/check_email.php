@@ -2,19 +2,18 @@
     if (isset($_GET['email'])) {
         $email = $_GET['email'];
 
-        $db = new SQLite3('mydb.sq3');
+        require_once __DIR__ . '/db.php';
         
-        $stmt = $db -> prepare ("SELECT email FROM users WHERE email = :email");
-        $stmt -> bindValue(':email', $email, SQLITE3_TEXT);
-        
-        $result = $stmt -> execute();
-        
-        $user = $result -> fetchArray(SQLITE3_ASSOC);
+        $stmt = $db -> prepare ("SELECT email FROM users WHERE email = ?");
+        $stmt -> bind_param('s', $email);
+        $stmt -> execute();
+        $result = $stmt ->get_result();
+        $user = $result -> fetch_assoc();
 
         if ($user) {
             echo("<b id='alreadyRegisterMsg'>Email already registered.</b>");
         }
 
-        unset($db);
+        $db->close();
     }
 ?>

@@ -25,11 +25,12 @@
             $userId = $_SESSION['user_id'];
 
             // Redirect if user changePassword is 0
-            $db = new SQLite3(__DIR__ . '/php/mydb.sq3');
-            $stmt = $db -> prepare("SELECT changePassword FROM users WHERE userId = :userId");
-            $stmt -> bindValue(':userId', $userId, SQLITE3_TEXT);
-            $result = $stmt->execute();
-            $row = $result->fetchArray(SQLITE3_ASSOC);
+            require_once __DIR__ . '/php/db.php';
+            $stmt = $db -> prepare("SELECT changePassword FROM users WHERE userId = ?");
+            $stmt -> bind_param('i', $userId);
+            $stmt -> execute();
+            $result = $stmt ->get_result();
+            $row = $result->fetch_assoc();
             if ($row["changePassword"] == 0) {
                 header("Location: http://localhost/projects/Project/src/login_page.php");
             }
@@ -42,19 +43,17 @@
 
             // Ensuring unique 2FA code
             while (true)  {
-                $stmt = $db -> prepare("SELECT COUNT(*) as count FROM users WHERE twofaCode = :randomSecret");
-                if ($stmt === false) {
-                    die("Database error: " . $db->lastErrorMsg());
-                }
-                $stmt -> bindValue(':randomSecret', $randomSecret, SQLITE3_TEXT);
-                $result = $stmt->execute();
-                $row = $result->fetchArray(SQLITE3_ASSOC);
+                $stmt = $db -> prepare("SELECT COUNT(*) as count FROM users WHERE twofaCode = ?");
+                $stmt -> bind_param('s', $randomSecret);
+                $stmt->execute();
+                $result = $stmt ->get_result();
+                $row = $result->fetch_assoc();
                 if ($row['count'] == 0) {
                     break;
                 }
                 $randomSecret = $ga->createSecret();
             }
-            unset($db);
+            $db->close();
             $qrCodeUrlBlob2 = $ga->getQRCodeGoogleUrl('Blog', $randomSecret);
 
             echo "<img style='display: block;-webkit-user-select: none;margin: auto;background-color: hsl(0, 0%, 90%);transition: background-color 300ms;' src='https://api.qrserver.com/v1/create-qr-code/?data=otpauth%3A%2F%2Ftotp%2FBlog%3Fsecret%3D".$randomSecret."&amp;size=200x200&amp;ecc=M'>";
@@ -89,7 +88,7 @@
         document.getElementById("width").value = screen.width; 
         document.getElementById("height").value = screen.height; 
         document.getElementById("os").value = window.navigator.platform;
-        document.getElementById('twofa').value = "<?php echo"$randomSecret"?>>";
+        document.getElementById('twofa').value = "<?php echo"$randomSecret"?>";
     }
 </script>
 

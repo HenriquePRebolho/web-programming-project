@@ -6,14 +6,16 @@
     echo($lastOnline);
 
     // Save last login
-    $db = new SQLite3('mydb.sq3');
+    require_once __DIR__ . '/db.php';
+    $stmt = $db -> prepare("UPDATE users SET lastOnline = ? WHERE userId = ?");
+    $stmt -> bind_param('si', $lastOnline, $userId);
+    $stmt -> execute();
 
-    $stmt = $db -> prepare("UPDATE users SET lastOnline = :lastOnline WHERE userId = :userId");
-    $stmt -> bindValue(':lastOnline', $lastOnline, SQLITE3_TEXT);
-    $stmt -> bindValue(':userId', $userId, SQLITE3_TEXT);
-    $result = $stmt -> execute();
+    if ($db->affected_rows === 0) {
+        echo "Error in saving data.";
+    }
 
-    unset($db); // delete variable and free space for usage 
+    $db->close(); 
 
     // Unset session variables
     $_SESSION = array();

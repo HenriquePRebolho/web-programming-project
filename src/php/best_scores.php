@@ -5,26 +5,28 @@
         header("Location: http://localhost/projects/Project/src/login_page.php");
     }
 
-    $db = new SQLite3('mydb.sq3');
+    require_once __DIR__ . '/db.php';
     $currentUserEmail = $_SESSION["email"]; 
 
-    // CTE for defining table to get top 5 and user position
+    // CTE for defining table to get top 5 and user position    
     $query = "
         WITH RankedUsers AS (
             SELECT 
-                ROW_NUMBER() OVER (ORDER BY highScore DESC) as rank, 
-                email, 
+                ROW_NUMBER() OVER (ORDER BY highScore DESC) AS rank,
+                email,
                 highScore
             FROM users
         )
         SELECT * FROM RankedUsers WHERE rank <= 5
         UNION ALL
-        SELECT * FROM RankedUsers WHERE email = :email AND rank > 5;
+        SELECT * FROM RankedUsers WHERE email = ? AND rank > 5
     ";
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(':email', $currentUserEmail, SQLITE3_TEXT);
-    $result = $stmt->execute();
+    $stmt->bind_param("s", $currentUserEmail);  // one call, "s" = string
+    $stmt->execute();
+    $result = $stmt->get_result();
+
 
     // Table
     $table = "
@@ -38,7 +40,7 @@
     $inTopFive = false;
     $rows = [];
 
-    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+    while ($row = $result->fetch_assoc()) {
         $rows[] = $row;
         if ($row['email'] === $currentUserEmail && $row['rank'] <= 5) {
             $inTopFive = true;
@@ -60,12 +62,12 @@
             <td style='user-select: none;'>" . $row["highScore"] . "</td>
         </tr>";
     }
+    $db->close();
 
     $table .= "</table>";
 
     echo($table);
 
-    unset($db);
     return;
 ?>
 

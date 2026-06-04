@@ -14,19 +14,22 @@
     $score = $_POST['score'];
 
     // Check if score > high score
-    $db = new SQLite3('mydb.sq3');
-    $stmt = $db -> prepare("SELECT highScore FROM users WHERE userId = :userId");
-    $stmt -> bindValue(':userId', $_SESSION['user_id'], SQLITE3_TEXT);
-    $result = $stmt -> execute();
-    $user = $result -> fetchArray(SQLITE3_ASSOC);
+    require_once __DIR__ . '/db.php';
+    $stmt = $db -> prepare("SELECT highScore FROM users WHERE userId = ?");
+    $stmt -> bind_param('i', $_SESSION['user_id']);
+    $stmt -> execute();
+    $result = $stmt ->get_result();
+    $user = $result -> fetch_assoc();
     if ($user['highScore'] < $score) {
         $stmt = $db -> prepare("UPDATE users 
-                        SET highScore = :highScore
-                        WHERE userId = :userId");
-        $stmt -> bindValue(':highScore', $score, SQLITE3_INTEGER);
-        $stmt -> bindValue(':userId', $_SESSION['user_id'], SQLITE3_TEXT);
+                        SET highScore = ?
+                        WHERE userId = ?");
+        $stmt -> bind_param('ii', $score, $_SESSION['user_id']);
+        $stmt -> execute();
 
-        $result = $stmt -> execute();
+        if ($db->affected_rows === 0) {
+            echo "Error in saving data.";
+        }
     }
-    unset($db);
+    $db->close();
 ?>

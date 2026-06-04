@@ -5,11 +5,16 @@
         header("Location: http://localhost/projects/Project/src/login_page.php");
     }
 
-    $db = new SQLite3('mydb.sq3');
-    $stmt = $db -> prepare("SELECT surname, lastOnline FROM users WHERE email = :email");
-    $stmt -> bindValue(':email', $_SESSION["email"], SQLITE3_TEXT);
-    $result = $stmt -> execute();
-    $user = $result -> fetchArray(SQLITE3_ASSOC);
+    require_once __DIR__ . '/db.php';
+    $stmt = $db -> prepare("SELECT surname, lastOnline FROM users WHERE email = ?");
+    $stmt -> bind_param('s', $_SESSION["email"]);
+    $stmt -> execute();
+    $result = $stmt ->get_result();
+    $user = $result -> fetch_assoc();
+
+    if (!$user) {
+        die("Could not find user");
+    }
 
     $lastOnline = "";
     if ($user["lastOnline"]) {
@@ -20,5 +25,5 @@
 
     echo("<h1>Welcome Mr&nbsp/&nbspMrs &nbsp" . $user["surname"] . "!</h1>" . $lastOnline);
 
-    unset($db);
+    $db->close();
 ?>
