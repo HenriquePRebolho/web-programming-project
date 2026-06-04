@@ -20,7 +20,7 @@
 
     <h1 class="m-1" style="color: white;">Login</h1>
 
-    <div id="LoginBox" class="d-flex flex-column justify-content-center align-items-center light-grey-color p-4">
+    <div id="FormBox" class="d-flex flex-column justify-content-center align-items-center light-grey-color p-4">
     
         <form action="php/enter_2fa.php" method="POST">
         
@@ -30,7 +30,7 @@
             </div>
             
             <div class="d-flex justify-content-center mb-1">
-                <button type="submit" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Submit</button>
+                <button type="submit" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Enter</button>
             </div>
         
         </form>

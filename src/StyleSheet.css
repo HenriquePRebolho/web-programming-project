@@ -12,6 +12,7 @@ input {
     width: 15rem;
 }
 
+/* TODO: better table in home_page.php */
 table {
     
 }
@@ -24,7 +25,7 @@ button:active {
     background-color: var(--red-color);
 }
 
-#LoginBox {
+#FormBox {
     padding: 2.5rem;
     margin: 5px;
     position: relative;

@@ -83,7 +83,7 @@
 
         <h1 class="m-1" style="color: white;">Register</h1>
 
-        <div id="LoginBox" class="d-flex flex-column justify-content-center align-items-center light-grey-color p-4">
+        <div id="FormBox" class="d-flex flex-column justify-content-center align-items-center light-grey-color p-4">
             <form action="php/register.php" method="POST">
                 <div class="mb-3">
                     <label for="email">Email</label> <br>

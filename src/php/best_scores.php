@@ -8,7 +8,7 @@
     $db = new SQLite3('mydb.sq3');
     $currentUserEmail = $_SESSION["email"]; 
 
-    // 1. One query to rule them all using a CTE (WITH clause)
+    // CTE for defining table to get top 5 and user position
     $query = "
         WITH RankedUsers AS (
             SELECT 
@@ -26,7 +26,7 @@
     $stmt->bindValue(':email', $currentUserEmail, SQLITE3_TEXT);
     $result = $stmt->execute();
 
-    // 2. Build the HTML Table (with fixed closing tags)
+    // Table
     $table = "
     <table style='user-select: none;'>
         <tr style='user-select: none;'>
@@ -46,7 +46,7 @@
     }
 
     foreach ($rows as $row) {
-        // Optional: Highlight the current user's row style-wise
+        // Highlight the current user's row style-wise
         $isCurrent = ($row["email"] === $currentUserEmail) ? " style='background-color: #e0f7fa; user-select: none;'" : "";
         
         // If this is the extra row for the user outside the top 5, add a visual separator

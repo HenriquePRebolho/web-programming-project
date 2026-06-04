@@ -25,7 +25,7 @@
 
         <h1 class="m-1" style="color: white;">Login</h1>
 
-        <div id="LoginBox" class="d-flex flex-column justify-content-center align-items-center light-grey-color p-4">
+        <div id="FormBox" class="d-flex flex-column justify-content-center align-items-center light-grey-color p-4">
             <form action="php/login.php" method="POST" onsubmit="getDeviceInfo()">
                 <div class="mb-3">
                     <label for="email">Email</label> <br>
@@ -42,13 +42,21 @@
                 <input type="hidden" name="height" id="height">
                 <input type="hidden" name="os" id="os">
 
-                <div class="d-flex justify-content-center mb-2">
+                <div class="d-flex justify-content-center mb-1">
                     <button type="submit" class="py-2 red-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Login</button>
                 </div>
             </form>
+
+            <hr style="width:100%;text-align:left;margin-left:0">
             
-            <div class="mt-1">
+            <div>
                 <a href="register_page.php" target="_self" style="font-size:11px; color: #007fd7">New? Register here</a>
+            </div>
+
+            <hr style="width:100%;text-align:left;margin-left:0">
+            
+            <div>
+                <a href="forgot_password_page.php" target="_self" style="font-size:11px; color: #007fd7">Forgot password?</a>
             </div>
   
             

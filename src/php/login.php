@@ -48,7 +48,7 @@
     
     // If first login, send to another page to update password 
     if ($user['changePassword'] == 1) {
-        header("Location: http://localhost/projects/Project/src/change_password_page.php");
+        header("Location: http://localhost/projects/Project/src/first_login_page.php");
         exit();
     }
 

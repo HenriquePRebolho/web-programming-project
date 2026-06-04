@@ -72,10 +72,8 @@
     $returnMsg = ''; 
     
     if($success) {
-        $returnMsg = "Confirmation email sent successfully. <a href=http://localhost/projects/Project/src/login_page.php>Back to login page</a>";
-        return $returnMsg;
+        echo("Confirmation email sent successfully. <a href=http://localhost/projects/Project/src/login_page.php>Back to login page</a>");
     } else {
-        $returnMsg = $errorMessage = error_get_last()['message'];
-        return $returnMsg;
+        echo(error_get_last()['message']);
     }
 ?>

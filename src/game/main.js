@@ -191,6 +191,40 @@ function sendRowBackAndRearrangeXs(row) {
     reached_final_z = -1;
     return;
 }
+
+
+function destroyCube() {
+    const fallProb = Math.random();
+    if (fallProb > 0.9) {
+        scene.remove(attachedCube);
+        destroyWeb();
+        isWebInScene = false;
+        shootingWeb = false;
+        attachedCube = null;
+    }
+}
+
+
+function scaleCubes() {
+    console.log("here")
+    for (let row of rows) {
+        for (let cube of row) {
+            if (cube.geometry.parameters.height > 2 && cube.geometry.parameters.height < 20) {
+                const scaleProb = Math.random();
+                if (scaleProb > 0.995) {
+                    const scaleDirProb = Math.random();
+                    if (scaleDirProb > 0.5) {
+                        cube.scale.y += 1;
+                        console.log("scaled up");
+                    } else {
+                        cube.scale.y -= 1;
+                        console.log("scaled down");
+                    }
+                } 
+            }
+        }
+    }
+}
 ////////////////////////////////////
 
 
@@ -354,6 +388,9 @@ function checkWebCollision() {
                 angularVelocity = -0.03 * Math.sign(camera.position.x - anchorPoint.x) || 0.03;
 
                 anchorBlockZ = attachedCube.position.z;
+
+                destroyCube();
+
                 return;
             }
         }
@@ -493,11 +530,12 @@ function animate(time) {
                             destroyWeb();
                             isWebInScene = false;
                             shootingWeb = false;
+                            scene.add(attachedCube);
                             attachedCube = null;
                         }
                     }
                     moveCamera();
-                    //forwardZs(0.01);
+                    forwardZs(0.05);
                 }
             } 
         } else {
@@ -525,6 +563,7 @@ function animate(time) {
         initial_loop = false;
     } else {
         forwardZs(0.1);
+        scaleCubes();
         if (reached_final_z !== -1) {
             sendRowBackAndRearrangeXs(reached_final_z);
         }
