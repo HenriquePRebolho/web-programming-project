@@ -206,7 +206,6 @@ function destroyCube() {
 
 
 function scaleCubes() {
-    console.log("here")
     for (let row of rows) {
         for (let cube of row) {
             if (cube.geometry.parameters.height > 2 && cube.geometry.parameters.height < 20) {
@@ -214,11 +213,9 @@ function scaleCubes() {
                 if (scaleProb > 0.995) {
                     const scaleDirProb = Math.random();
                     if (scaleDirProb > 0.5) {
-                        cube.scale.y += 1;
-                        console.log("scaled up");
+                        cube.scale.y += 0.5;
                     } else {
-                        cube.scale.y -= 1;
-                        console.log("scaled down");
+                        cube.scale.y -= 0.5;
                     }
                 } 
             }
@@ -492,7 +489,7 @@ function getRndInteger(min, max) {
 
 
 ////////////////////////////////////
-// METHOD CALLS ////////////////////
+// RUN AT START ////////////////////
 generateBorders();
 generateWeb();
 const topBB = new THREE.Box3().setFromObject(borders[0]);

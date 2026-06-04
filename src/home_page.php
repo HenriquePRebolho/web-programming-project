@@ -85,7 +85,7 @@
     <body> <!-- id="GameMenuBox" -->
 
         <div class="d-flex justify-content-between mb-5 mt-3 ms-3 me-3">
-            <div class="mt-4">
+            <div class="d-flex flex-column mt-4">
                 <form action="php/logout.php" method="POST" onsubmit="getDate()">
                     <!-- Hidden field -->
                     <input type="hidden" name="lastOnline" id="lastOnline">
@@ -93,6 +93,10 @@
                         <button type="submit" id="logout" class="py-2 grey-color" style="width: 100%; border-style:hidden; -moz-border-radius: 10px;-webkit-border-radius: 10px; border-radius:40px; color:white; box-shadow: 1px 1px 1px black">Logout</button>
                     </div>
                 </form>
+
+                <div>
+                    <button onclick="handleLoop()" id="muteBtn" style="padding: 0.5rem; margin: 2px; background-color: var(--light-grey-color); border-color: var(--blue-color); border-width: 2px; border-style: solid; -moz-border-radius: 20px; -webkit-border-radius: 20px; border-radius: 10px;">🔊</button>
+                </div>
             </div>
 
             <div></div>
@@ -111,6 +115,10 @@
             </div>
             
         </div>
+
+        <audio id="myAudio" loop muted>
+            <source src="../assets/audio/2019-12-11_-_Retro_Platforming_-_David_Fesliyan.mp3" type="audio/mpeg">
+        </audio> 
     </body>
 </html>
 
@@ -135,6 +143,7 @@
         document.getElementById('logout').style.display = 'none';
         document.getElementById('online_users').style.display = 'none';
         document.getElementById('play').style.display = 'none';
+        document.getElementById('muteBtn').style.display = 'none';
         window.onStartGame();
     }
 
@@ -143,6 +152,7 @@
         document.getElementById('logout').style.display = 'block';
         document.getElementById('online_users').style.display = 'block';
         document.getElementById('play').style.display = 'block';
+        document.getElementById('muteBtn').style.display = 'block';
 
         fetch('./php/save_score.php', {
             method: 'POST',
@@ -154,4 +164,18 @@
         // restore UI + fetch save_score
         gameOver(score);
     }
+</script>
+
+<script>
+    var x = document.getElementById("myAudio");
+    let starded = false;
+
+    function handleLoop() {
+        if (!starded) {
+            x.play();
+            starded = true;
+        }
+        x.muted = !x.muted;
+        document.getElementById("muteBtn").textContent = x.muted ? "🔇" : "🔊";
+    } 
 </script>
