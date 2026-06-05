@@ -22,7 +22,6 @@
     $twofa = $_POST['twofa'];
 
     // Check if password is valid
-    // TODO: make errors appear in login_page.php and not in login.php
     $upperCase = preg_match('/[A-Z]/', $new_password); 
     $lowerCase = preg_match('/[a-z]/', $new_password); 
     $numericVal = preg_match('/[0-9]/', $new_password);
