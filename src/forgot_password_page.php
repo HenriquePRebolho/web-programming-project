@@ -16,7 +16,6 @@
 
         <h1 class="m-1" style="color: white;">Reset your password</h1>
 
-        <!-- TODO: fix css in form box -->
         <div id="FormBox" class="d-flex flex-column justify-content-center align-items-center light-grey-color p-4">
             <form action="php/send_change_password_email.php" method="POST">
                 <div class="mb-3">

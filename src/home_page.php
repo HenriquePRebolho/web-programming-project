@@ -1,7 +1,7 @@
 <?php
     session_start();
 
-    if (!isset($_SESSION['user_id'])) { // TODO: and qr code
+    if (!isset($_SESSION['user_id'])) {
         header("Location: http://localhost/projects/Project/src/login_page.php");
     }
 ?>
