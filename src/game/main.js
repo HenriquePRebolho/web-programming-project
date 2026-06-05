@@ -62,6 +62,7 @@ let borders = [];
 let anchorBlockZ;
 let score = 0;
 let gameStarted = false;
+let cubes_attached = 0;
 ////////////////////////////////////
 
 
@@ -386,6 +387,8 @@ function checkWebCollision() {
 
                 anchorBlockZ = attachedCube.position.z;
 
+                cubes_attached += 1;
+
                 destroyCube();
 
                 return;
@@ -544,7 +547,7 @@ function animate(time) {
         score += 1;
         checkCameraCollision();
         if (cameraCollision) {
-            score = Math.floor(score/60);
+            score = Math.floor(score/60 + cubes_attached);
             gameStarted = false;
             resetCamera();
             if (window.onGameOver) window.onGameOver(score);

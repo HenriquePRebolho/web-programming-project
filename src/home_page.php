@@ -72,9 +72,19 @@
                 z-index: 0;        /* behind everything */
             }
 
-            body > *:not(canvas) {
+            body > *:not(canvas) :not(#GameMenuBox){
                 position: relative;
-                z-index: 1;        /* above canvas */
+                z-index: 2;        /* above canvas */
+            }
+            #GameMenuBox {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(232, 232, 232, 0.19);
+                z-index: 1;
+                pointer-events: none;
             }
             body {
                 text-align: center;
@@ -82,7 +92,8 @@
         </style>
     </head>
 
-    <body> <!-- id="GameMenuBox" -->
+    <body>
+        <div id="GameMenuBox"></div>
 
         <div class="d-flex justify-content-between mb-5 mt-3 ms-3 me-3">
             <div class="d-flex flex-column mt-4">
@@ -144,6 +155,7 @@
         document.getElementById('online_users').style.display = 'none';
         document.getElementById('play').style.display = 'none';
         document.getElementById('muteBtn').style.display = 'none';
+        document.getElementById('GameMenuBox').style.display = 'none';
         window.onStartGame();
     }
 
@@ -153,6 +165,7 @@
         document.getElementById('online_users').style.display = 'block';
         document.getElementById('play').style.display = 'block';
         document.getElementById('muteBtn').style.display = 'block';
+        document.getElementById('GameMenuBox').style.display = 'block';
 
         fetch('./php/save_score.php', {
             method: 'POST',
