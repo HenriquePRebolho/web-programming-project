@@ -28,8 +28,36 @@
                 </div>
             </form>
 
-            <!-- TODO: make errors appear in forgot_password_page.php and not in forgot_password.php -->    
-            <div id="sent"></div>
+            <div id="sent" class="mt-1"></div>
         </div>
+
+
+        <script type="text/javascript">
+            document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault(); // stop normal form submission
+
+                const formData = new FormData(this);
+                const errorDiv = document.getElementById('sent');
+                errorDiv.textContent = ''; // clear previous errors
+
+                fetch('php/send_change_password_email.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect; // redirect if correct login
+                    } else {
+                        errorDiv.textContent = data.message;  // show error in page
+                        errorDiv.style.color = 'var(--red-color)';
+                    }
+                })
+                .catch(error => {
+                    errorDiv.textContent = 'An unexpected error occurred.';
+                    errorDiv.style.color = 'red';
+                });
+            });
+        </script>
     </body>
 </html>

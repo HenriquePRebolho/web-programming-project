@@ -1,14 +1,17 @@
 <?php 
     session_start();
+    header('Content-Type: application/json');
 
     // Check if data is set
     if(!(isset($_SESSION['user_id']) || isset($_SESSION['email']))) {
-        header("Location: http://localhost/projects/Project/src/login_page.php");
+        echo json_encode(['success' => true, 'redirect' => 'http://localhost/projects/Project/src/login_page.php']);
+        exit();
     }
 
     // Check if email is valid
     if(!(isset($_POST['password']) || isset($_POST['width']) || isset($_POST['height']) || isset($_POST['os']) || isset($_POST['twofa']))) {
-        die("Missing information");
+        echo json_encode(['success' => false, 'message' => 'Missing data']);
+        exit();
     }
 
     // Extract user info
@@ -24,9 +27,9 @@
     $lowerCase = preg_match('/[a-z]/', $new_password); 
     $numericVal = preg_match('/[0-9]/', $new_password);
     if (!($upperCase && $lowerCase && $numericVal && strlen($new_password))) {
-        die("Password not valid. Must be at least 9 characters, one upper case letter, one lower case letter and one number");
+        echo json_encode(['success' => false, 'message' => 'Password not valid. Must be at least 9 characters, one upper case letter, one lower case letter and one number']);
+        exit();
     }
-
 
     // Update password
     require_once __DIR__ . '/db.php';
@@ -53,7 +56,7 @@
 
     $db->close();
 
-    // Send user to home page
-    header("Location: http://localhost/projects/Project/src/login_page.php");
+    // Send user to 2fa page
+    echo json_encode(['success' => true, 'redirect' => 'http://localhost/projects/Project/src/enter_2fa_page.php']);
     exit();
 ?>

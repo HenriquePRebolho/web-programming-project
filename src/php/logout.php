@@ -7,7 +7,7 @@
 
     // Save last login
     require_once __DIR__ . '/db.php';
-    $stmt = $db -> prepare("UPDATE users SET lastOnline = ? WHERE userId = ?");
+    $stmt = $db->prepare("UPDATE users SET lastOnline = ?, isOnline = 0, lastSeen = 0 WHERE userId = ?");
     $stmt -> bind_param('si', $lastOnline, $userId);
     $stmt -> execute();
 

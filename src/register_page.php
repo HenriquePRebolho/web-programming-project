@@ -90,6 +90,7 @@
                     <input type="email" name="email" id="email" placeholder="name@email.com" minlength="6" required>
                     <div id="checkEmail"></div>
                 </div>
+                
                 <div class="mb-3">
                     <label for="email">Surname</label> <br>
                     <input type="text" name="surname" id="surname" placeholder="Smith" required>
@@ -103,8 +104,36 @@
                     Have an account?<a href="login_page.php" target="_self" style="font-size:11px; color: #007fd7">Login here</a>
                 </div>
             </form>
+            
+            <div id="sent" class="mt-1"></div>
         </div>
-        <!-- TODO: msg in register page -->
-        <div id="sent"></div>
+   
+        <script type="text/javascript">
+            document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault(); // stop normal form submission
+
+                const formData = new FormData(this);
+                const errorDiv = document.getElementById('sent');
+                errorDiv.textContent = ''; // clear previous errors
+
+                fetch('php/register.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect; // redirect if correct login
+                    } else {
+                        errorDiv.textContent = data.message;  // show error in page
+                        errorDiv.style.color = 'var(--red-color)';
+                    }
+                })
+                .catch(error => {
+                    errorDiv.textContent = 'An unexpected error occurred.';
+                    errorDiv.style.color = 'red';
+                });
+            });
+        </script>
     </body>
 </html>

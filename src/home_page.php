@@ -131,6 +131,13 @@
             <source src="../assets/audio/2019-12-11_-_Retro_Platforming_-_David_Fesliyan.mp3" type="audio/mpeg">
         </audio> 
     </body>
+
+    <script type="text/javascript">
+        // Heartbeat — keeps lastSeen fresh while tab is open
+        setInterval(function() {
+            navigator.sendBeacon('./php/heartbeat.php');
+        }, 30000);
+    </script>
 </html>
 
 <script>

@@ -1,12 +1,16 @@
 <?php
+
+    header('Content-Type: application/json');
+
     if (!isset($_POST['email']) || !isset($_POST['surname'])) {
-        die("Missing data");
+        echo json_encode(['success' => false, 'message' => 'Missing data']);
+        exit();
     }
 
     // Check if email is valid
     if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-        echo("Could not register: '" . $_POST['email'] . "' is not a valid email");
-        return;
+        echo json_encode(['success' => false, 'message' => 'Not a valid email']);
+        exit();
     }
 
     // Extract user info
@@ -21,7 +25,8 @@
     $result = $stmt ->get_result();
     $user = $result -> fetch_assoc();
     if ($user) {
-        die("Email already registered.");
+        echo json_encode(['success' => false, 'message' => 'Email already registered.']);
+        exit();
     }
        
     // Define password
@@ -41,7 +46,8 @@
     $stmt -> bind_param('sss', $email, $surname, $hashed_password);
     $stmt -> execute();
     if ($db->affected_rows === 0) {
-        echo "Could not create.";
+        echo json_encode(['success' => false, 'message' => 'Could not create.']);
+        exit();
     }
     $db->close();
 
@@ -69,7 +75,8 @@
     $returnMsg = ''; 
     
     if($success) {
-        echo("Confirmation email sent successfully. <a href=http://localhost/projects/Project/src/login_page.php>Back to login page</a>");
+        echo json_encode(['success' => true, 'redirect' => 'http://localhost/projects/Project/src/login_page.php']);
+        exit();
     } else {
         echo(error_get_last()['message']);
     }

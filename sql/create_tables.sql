@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     highScore   INT          NOT NULL DEFAULT 0,
     lastOnline  VARCHAR(50),
     isOnline    TINYINT      DEFAULT 0,
+    lastSeen    INT          DEFAULT 0;
     screenWidth INT,
     screenHeight INT,
     opSys       VARCHAR(64),

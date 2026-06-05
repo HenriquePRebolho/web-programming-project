@@ -1,13 +1,16 @@
 <?php
+    
+    header('Content-Type: application/json');
 
     if (!isset($_POST['email'])) {
-        die("Missing data");
+        echo json_encode(['success' => false, 'message' => 'Missing data']);
+        exit();
     }
 
     // Check if email is valid
     if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-        echo("Could not register: '" . $_POST['email'] . "' is not a valid email");
-        return;
+        echo json_encode(['success' => false, 'message' => 'Not a valid email']);
+        exit();
     }
 
     // Extract user info
@@ -21,11 +24,13 @@
     $result = $stmt ->get_result();
     $user = $result -> fetch_assoc();
     if (!$user) {
-        die("Email not registered.");
+        echo json_encode(['success' => false, 'message' => 'Email not registered.']);
+        exit();
     }
     
     if ($user['changePassword'] == 1) {
-        die("Login for the first time before you change your password");
+        echo json_encode(['success' => false, 'message' => 'Login for the first time before you change your password.']);
+        exit();
     }
     
     
@@ -42,11 +47,13 @@
     $stmt =  $db -> prepare ("INSERT INTO password_resets (userId, token, expiresAt) VALUES (?, ?, ?)");
     $stmt -> bind_param('isi', $user['userId'], $token, $expiresAt);
     if (!$stmt->execute()) {
-        die("Could not save token: " . $stmt->error);
+        echo json_encode(['success' => false, 'message' => 'Could not save token.']);
+        exit();
     }
 
     if ($db->insert_id === 0) {
-        die("Insert appeared to succeed but no row was created.");
+        echo json_encode(['success' => false, 'message' => 'Insert appeared to succeed but no row was created.']);
+        exit();
     }
     $db->close(); 
 
@@ -76,9 +83,11 @@
     $returnMsg = ''; 
     
     if($success) {
-        echo("<p>Change password email sent successfully. Check your email inbox.</p>");
+        echo json_encode(['success' => false, 'message' => 'Change password email sent successfully. Check your email inbox.']);
+        exit();
     } else {
-        echo(error_get_last()['message']);
+        echo json_encode(['success' => false, 'message' => 'Error in sending mail']);
+        exit();
     }
 
 ?>

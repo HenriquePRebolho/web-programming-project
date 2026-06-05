@@ -4,16 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="author" content="HenriqueRebolloPadovani">
-        <title>Login</title>
-
-        <script type="text/javascript">
-            function getDeviceInfo() {
-                document.getElementById("width").value = screen.width; 
-                document.getElementById("height").value = screen.height; 
-                document.getElementById("os").value = window.navigator.platform;
-                return true;
-            }
-        </script>
+        <title>Login</title> 
 
         <!-- CSS -->
         <link href="../extern/bootstrap/css/bootstrap-grid.min.css" rel="stylesheet">
@@ -58,10 +49,45 @@
             <div>
                 <a href="forgot_password_page.php" target="_self" style="font-size:11px; color: #007fd7">Forgot password?</a>
             </div>
-  
-            
-            <!-- TODO: make errors appear in login_page.php and not in login.php -->    
-            <div id="sent"></div>
+    
+            <div id="sent" class="mt-1"></div>
         </div>
+
+        <script type="text/javascript">
+            function getDeviceInfo() {
+                document.getElementById("width").value = screen.width; 
+                document.getElementById("height").value = screen.height; 
+                document.getElementById("os").value = window.navigator.platform;
+                return true;
+            }
+
+            document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault(); // stop normal form submission
+                
+                getDeviceInfo();
+
+                const formData = new FormData(this);
+                const errorDiv = document.getElementById('sent');
+                errorDiv.textContent = ''; // clear previous errors
+
+                fetch('php/login.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect; // redirect if correct login
+                    } else {
+                        errorDiv.textContent = data.message;  // show error in page
+                        errorDiv.style.color = 'var(--red-color)';
+                    }
+                })
+                .catch(error => {
+                    errorDiv.textContent = 'An unexpected error occurred.';
+                    errorDiv.style.color = 'red';
+                });
+            });
+        </script>  
     </body>
 </html>

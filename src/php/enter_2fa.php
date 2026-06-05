@@ -1,14 +1,18 @@
 <?php 
     session_start();
+    
+    header('Content-Type: application/json');
 
     // Check if data is set
     if(!(isset($_SESSION['user_id']))) {
-        header("Location: http://localhost/projects/Project/src/login_page.php");
+        echo json_encode(['success' => true, 'redirect' => 'http://localhost/projects/Project/src/login_page.php']);
+        exit();
     }
 
     // Check if 2fa is set
     if(!isset($_POST['twofa'])) {
-        die("Missing information");
+        echo json_encode(['success' => false, 'message' => 'Missing data']);
+        exit();
     }
 
     // Extract user info
@@ -23,7 +27,8 @@
     $result = $stmt ->get_result();
     $user = $result -> fetch_assoc();
     $secret = $user['twofaCode'];
-    
+
+    $db->close();
 
     require_once '../../extern/google_auth/PHPGangsta/GoogleAuthenticator.php';
     $checkResult=false;
@@ -32,26 +37,12 @@
     $checkResult= $ga -> verifyCode($secret, $twofa, 1); //1=30sec
 
     if($checkResult){
-        header("Location: http://localhost/projects/Project/src/home_page.php");
+        echo json_encode(['success' => true, 'redirect' => 'http://localhost/projects/Project/src/home_page.php']);
+        exit();
     } else {
-        header("Location: ../enter_2fa_page.php");
+        echo json_encode(['success' => false, 'message' => 'Wrong code']);
+        exit();
     }
-
-    $db->close();
-
-
-/*     // Check 2FA
-    $db = new SQLite3('mydb.sq3');
-    $stmt = $db -> prepare("UPDATE users SET twofaCode = :twofa WHERE userId = :userId");
-    $stmt -> bindValue(':userId', $_SESSION['user_id'], SQLITE3_TEXT);
-
-    $result = $stmt -> execute();
-
-    unset($db);
-
-    // Send user to home page
-    header("Location: http://localhost/projects/Project/src/home_page.php");
-    exit(); */
 ?>
 
 
